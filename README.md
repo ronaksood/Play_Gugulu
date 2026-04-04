@@ -1,26 +1,26 @@
 <div align="center">
   <h2>🎮 Gameplay Preview</h2>
 
-  <img src="public/img1.png" width="30%" />
-  <img src="public/img2.png" width="30%" />
-  <img src="public/img3.png" width="30%" />
+  <img src="public/img1.jpeg" width="30%" />
+  <img src="public/img2.jpeg" width="30%" />
+  <img src="public/img3.jpeg" width="30%" />
 
   <br/><br/>
 
-  <img src="public/img4.png" width="30%" />
-  <img src="public/img5.png" width="30%" />
-  <img src="public/img6.png" width="30%" />
+  <img src="public/img4.jpeg" width="30%" />
+  <img src="public/img5.jpeg" width="30%" />
+  <img src="public/img6.jpeg" width="30%" />
 
   <br/><br/>
 
-  <img src="public/img7.png" width="30%" />
-  <img src="public/img8.png" width="30%" />
-  <img src="public/img9.png" width="30%" />
+  <img src="public/img7.jpeg" width="30%" />
+  <img src="public/img8.jpeg" width="30%" />
+  <img src="public/img9.jpeg" width="30%" />
 
   <br/><br/>
 
-  <img src="public/img10.png" width="45%" />
-  <img src="public/img11.png" width="45%" />
+  <img src="public/img10.jpeg" width="45%" />
+  <img src="public/img11.jpeg" width="45%" />
 </div>
 
 
