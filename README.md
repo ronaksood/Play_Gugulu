@@ -1,4 +1,31 @@
 <div align="center">
+  <h2>🎮 Gameplay Preview</h2>
+
+  <img src="public/img1.png" width="30%" />
+  <img src="public/img2.png" width="30%" />
+  <img src="public/img3.png" width="30%" />
+
+  <br/><br/>
+
+  <img src="public/img4.png" width="30%" />
+  <img src="public/img5.png" width="30%" />
+  <img src="public/img6.png" width="30%" />
+
+  <br/><br/>
+
+  <img src="public/img7.png" width="30%" />
+  <img src="public/img8.png" width="30%" />
+  <img src="public/img9.png" width="30%" />
+
+  <br/><br/>
+
+  <img src="public/img10.png" width="45%" />
+  <img src="public/img11.png" width="45%" />
+</div>
+
+
+
+<div align="center">
   <h1>PlayGugulu</h1>
   <p><strong>Adaptive AI-Powered Learning Platform for Children Ages 3–7</strong></p>
 
