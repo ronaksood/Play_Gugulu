@@ -1,0 +1,73 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "NextActivity",
+  "description": "Formula engine output — fully deterministic. No ML used here.",
+  "type": "object",
+  "required": [
+    "child_id", "session_id", "next_task_id", "next_skill_focus", "next_skill_display",
+    "next_modality", "next_difficulty", "next_difficulty_label", "hint_intensity",
+    "reward_type", "session_length_adjustment", "end_session", "parent_tip", "reason",
+    "mastery_context"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "child_id":           { "type": "string" },
+    "session_id":         { "type": "string" },
+    "next_task_id":       { "type": "string", "description": "Composable ID for the game engine to look up" },
+    "next_skill_focus":   { "type": "string" },
+    "next_skill_display": { "type": "string" },
+    "next_modality": {
+      "type": "string",
+      "enum": ["visual", "auditory", "kinesthetic", "story", "mixed"]
+    },
+    "next_difficulty": {
+      "type": "integer", "minimum": 1, "maximum": 5
+    },
+    "next_difficulty_label": {
+      "type": "string",
+      "enum": ["very_easy", "easy", "medium", "hard", "very_hard"]
+    },
+    "hint_intensity": {
+      "type": "string",
+      "enum": ["none", "low", "medium", "high"],
+      "description": "Rule-based. Driven by mastery_prob + consecutive errors + engagement state."
+    },
+    "reward_type": {
+      "type": "string",
+      "enum": ["sparkle", "progress_badge", "celebration", "encouragement_star", "streak_flame"],
+      "description": "Rule-based reward type. Streak and milestone triggers."
+    },
+    "session_length_adjustment": {
+      "type": "object",
+      "required": ["remaining_seconds", "action"],
+      "properties": {
+        "remaining_seconds": { "type": "number" },
+        "action": { "type": "string", "enum": ["maintain", "soft", "hard", "end_session"] }
+      }
+    },
+    "end_session":  { "type": "boolean" },
+    "end_reason":   { "type": "string" },
+    "parent_tip": {
+      "type": "string",
+      "description": "One actionable sentence for the parent. Rule-based template."
+    },
+    "offline_activity": {
+      "type": "string",
+      "description": "Suggested home activity. Rule-based skill+age_band lookup."
+    },
+    "reason": {
+      "type": "string",
+      "description": "Interpretable explanation of why this activity was chosen."
+    },
+    "mastery_context": {
+      "type": "object",
+      "description": "Mastery data for the selected skill (for transparency).",
+      "properties": {
+        "skill":        { "type": "string" },
+        "mastery_prob": { "type": "number" },
+        "mastery_class":{ "type": "string" },
+        "confidence":   { "type": "number" }
+      }
+    }
+  }
+}

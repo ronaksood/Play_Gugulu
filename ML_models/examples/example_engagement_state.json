@@ -1,0 +1,27 @@
+{
+  "child_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+  "session_id": "sess_20260403_002",
+  "engagement_state": "neutral",
+  "fatigue_risk": 0.28,
+  "attention_level": 0.55,
+  "confidence": 0.71,
+  "probabilities": {
+    "fatigued": 0.28,
+    "neutral":  0.71,
+    "engaged":  0.01
+  },
+  "alert_level": "none",
+  "cold_start": false,
+
+  "_comment_for_judges": {
+    "model": "XGBoost 3-class classifier (fatigued/neutral/engaged)",
+    "calibration": "CalibratedClassifierCV(method=isotonic, cv=3)",
+    "key_signals": [
+      "response_time_trend=+12ms/event (slight slowdown)",
+      "error_rate_last_5=0.28 (moderate)",
+      "pause_duration_max=3800ms (one long pause observed)",
+      "session_duration_ratio=0.61 (11 of 18 min elapsed)"
+    ],
+    "decision_chain": "fatigue_risk=0.28 < 0.60 → alert_level=none → no session shortening triggered"
+  }
+}

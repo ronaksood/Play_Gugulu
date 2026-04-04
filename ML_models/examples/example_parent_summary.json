@@ -1,0 +1,54 @@
+{
+  "child_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+  "session_id": "sess_20260403_002",
+  "generated_at": "2026-04-03T10:22:15Z",
+  "strengths": [
+    {
+      "skill": "color_sorting",
+      "display_name": "Color Sorting",
+      "mastery_prob": 0.72,
+      "trend": "improving",
+      "note": "Color Sorting is improving and looking strong."
+    },
+    {
+      "skill": "counting",
+      "display_name": "Counting",
+      "mastery_prob": 0.62,
+      "trend": "improving",
+      "note": "Counting is a clear strength."
+    }
+  ],
+  "weak_areas": [
+    {
+      "skill": "phonics",
+      "display_name": "Phonics & Sounds",
+      "mastery_prob": 0.31,
+      "trend": "stable",
+      "note": "Phonics & Sounds is still developing — consistent practice helps."
+    },
+    {
+      "skill": "number_order",
+      "display_name": "Number Order",
+      "mastery_prob": 0.28,
+      "trend": "stable",
+      "note": "Number Order is still developing — consistent practice helps."
+    }
+  ],
+  "best_learning_style": {
+    "modality": "auditory",
+    "success_rate": 0.81,
+    "confidence": "high",
+    "display": "sound and music activities",
+    "note": "Your child responds well to sounds and music — songs and rhymes work brilliantly."
+  },
+  "attention_trend": {
+    "quality": "moderate",
+    "engagement": "neutral",
+    "fatigue_risk": 0.28,
+    "note": "Focus was steady, with a few slower moments toward the end."
+  },
+  "recommended_offline_activity": "Point out letters on cereal boxes and signs.",
+  "parent_action": "Focus on Phonics & Sounds this week — it needs a little extra attention. Little and often works best.",
+  "confidence": "moderate",
+  "human_summary": "Aarav completed a 12-minute session today with good effort. Color Sorting is going really well! Counting is also going well. Phonics & Sounds needs a little more practice — try the home activity suggestion below. Your child responds well to sounds and music — songs and rhymes work brilliantly."
+}

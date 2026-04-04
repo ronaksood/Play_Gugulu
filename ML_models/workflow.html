@@ -1,0 +1,2173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Adaptive Learning Engine — Complete Workflow</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:        #07091a;
+    --bg2:       #0d1225;
+    --card:      #111827;
+    --card2:     #1a2235;
+    --border:    #1e2d4a;
+    --blue:      #3b82f6;
+    --indigo:    #6366f1;
+    --purple:    #8b5cf6;
+    --amber:     #f59e0b;
+    --green:     #10b981;
+    --pink:      #ec4899;
+    --red:       #ef4444;
+    --cyan:      #06b6d4;
+    --text:      #e2e8f0;
+    --muted:     #64748b;
+    --mono:      'JetBrains Mono', monospace;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    overflow-x: hidden;
+  }
+
+  /* ─── CANVAS BACKGROUND ─── */
+  #hero-canvas {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ─── HERO ─── */
+  .hero {
+    position: relative;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 2rem;
+    overflow: hidden;
+  }
+
+  .hero-content { position: relative; z-index: 1; }
+
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: .5rem;
+    background: rgba(99,102,241,.15);
+    border: 1px solid rgba(99,102,241,.4);
+    color: var(--indigo);
+    padding: .35rem 1rem;
+    border-radius: 99px;
+    font-size: .75rem;
+    font-weight: 600;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    margin-bottom: 1.5rem;
+    animation: fadeDown .8s ease both;
+  }
+
+  .hero h1 {
+    font-size: clamp(2.5rem, 6vw, 5rem);
+    font-weight: 900;
+    line-height: 1.1;
+    margin-bottom: 1rem;
+    animation: fadeDown .8s .1s ease both;
+  }
+
+  .grad-text {
+    background: linear-gradient(135deg, var(--blue), var(--purple), var(--pink));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .hero p {
+    font-size: clamp(1rem, 2vw, 1.25rem);
+    color: var(--muted);
+    max-width: 640px;
+    margin: 0 auto 2.5rem;
+    line-height: 1.7;
+    animation: fadeDown .8s .2s ease both;
+  }
+
+  .hero-pills {
+    display: flex;
+    gap: .75rem;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-bottom: 3rem;
+    animation: fadeDown .8s .3s ease both;
+  }
+
+  .pill {
+    padding: .4rem .9rem;
+    border-radius: 99px;
+    font-size: .8rem;
+    font-weight: 600;
+    border: 1px solid;
+  }
+  .pill-blue   { background: rgba(59,130,246,.1);  border-color: rgba(59,130,246,.3);  color: var(--blue);   }
+  .pill-indigo { background: rgba(99,102,241,.1);  border-color: rgba(99,102,241,.3);  color: var(--indigo); }
+  .pill-amber  { background: rgba(245,158,11,.1);  border-color: rgba(245,158,11,.3);  color: var(--amber);  }
+  .pill-green  { background: rgba(16,185,129,.1);  border-color: rgba(16,185,129,.3);  color: var(--green);  }
+  .pill-pink   { background: rgba(236,72,153,.1);  border-color: rgba(236,72,153,.3);  color: var(--pink);   }
+
+  .simulate-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: .6rem;
+    background: linear-gradient(135deg, var(--indigo), var(--purple));
+    color: #fff;
+    border: none;
+    padding: .9rem 2rem;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    animation: fadeDown .8s .4s ease both, pulse-glow 3s 1.5s ease infinite;
+    transition: transform .2s, box-shadow .2s;
+    letter-spacing: .02em;
+  }
+  .simulate-btn:hover { transform: translateY(-2px) scale(1.02); box-shadow: 0 12px 40px rgba(99,102,241,.5); }
+  .simulate-btn:active { transform: scale(.97); }
+
+  .scroll-hint {
+    position: absolute;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: .4rem;
+    color: var(--muted);
+    font-size: .75rem;
+    animation: bounce 2s ease infinite;
+    z-index: 1;
+  }
+  .scroll-hint svg { width: 20px; height: 20px; }
+
+  /* ─── SECTION BASE ─── */
+  section {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 5rem 2rem;
+  }
+
+  .section-label {
+    display: inline-flex;
+    align-items: center;
+    gap: .5rem;
+    font-size: .72rem;
+    font-weight: 700;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: .75rem;
+  }
+  .section-label span { display: inline-block; width: 28px; height: 2px; background: currentColor; border-radius: 2px; }
+
+  .section-title {
+    font-size: clamp(1.8rem, 3.5vw, 2.8rem);
+    font-weight: 800;
+    line-height: 1.2;
+    margin-bottom: 1rem;
+  }
+
+  .section-sub {
+    color: var(--muted);
+    font-size: 1.05rem;
+    line-height: 1.7;
+    max-width: 640px;
+    margin-bottom: 3rem;
+  }
+
+  /* ─── PIPELINE OVERVIEW ─── */
+  .pipeline-container {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 3rem 2rem;
+    overflow-x: auto;
+    position: relative;
+  }
+
+  .pipeline-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    min-width: 800px;
+  }
+
+  .pipe-node {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: .6rem;
+    cursor: default;
+    flex-shrink: 0;
+  }
+
+  .pipe-icon {
+    width: 64px;
+    height: 64px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.6rem;
+    transition: transform .3s, box-shadow .3s;
+    position: relative;
+  }
+  .pipe-node:hover .pipe-icon { transform: scale(1.12); }
+
+  .pipe-icon.active {
+    animation: node-pulse 1s ease;
+  }
+
+  .pipe-label {
+    font-size: .72rem;
+    font-weight: 600;
+    text-align: center;
+    color: var(--muted);
+    max-width: 80px;
+    line-height: 1.3;
+  }
+
+  .pipe-arrow {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+    width: 50px;
+    position: relative;
+    margin-bottom: 1.5rem;
+  }
+
+  .arrow-line {
+    width: 100%;
+    height: 2px;
+    background: var(--border);
+    position: relative;
+    overflow: hidden;
+  }
+  .arrow-line::after {
+    content: '';
+    position: absolute;
+    top: 0; left: -100%;
+    width: 60%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, var(--blue), transparent);
+  }
+  .arrow-line.flowing::after {
+    animation: flow-line 1.5s linear infinite;
+  }
+
+  .arrow-head {
+    width: 0; height: 0;
+    border-top: 5px solid transparent;
+    border-bottom: 5px solid transparent;
+    border-left: 8px solid var(--border);
+    flex-shrink: 0;
+  }
+
+  .icon-blue   { background: rgba(59,130,246,.15);  box-shadow: 0 0 0 1px rgba(59,130,246,.3);  }
+  .icon-indigo { background: rgba(99,102,241,.15);  box-shadow: 0 0 0 1px rgba(99,102,241,.3);  }
+  .icon-amber  { background: rgba(245,158,11,.15);  box-shadow: 0 0 0 1px rgba(245,158,11,.3);  }
+  .icon-green  { background: rgba(16,185,129,.15);  box-shadow: 0 0 0 1px rgba(16,185,129,.3);  }
+  .icon-pink   { background: rgba(236,72,153,.15);  box-shadow: 0 0 0 1px rgba(236,72,153,.3);  }
+  .icon-cyan   { background: rgba(6,182,212,.15);   box-shadow: 0 0 0 1px rgba(6,182,212,.3);   }
+  .icon-purple { background: rgba(139,92,246,.15);  box-shadow: 0 0 0 1px rgba(139,92,246,.3);  }
+
+  /* ─── STEP CARDS ─── */
+  .step-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+  }
+  @media(max-width:768px) { .step-grid { grid-template-columns: 1fr; } }
+
+  .step-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 2rem;
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity .6s ease, transform .6s ease;
+  }
+  .step-card.visible { opacity: 1; transform: translateY(0); }
+  .step-card.full-width { grid-column: 1 / -1; }
+
+  .step-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .step-num {
+    width: 36px; height: 36px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: .8rem;
+    font-weight: 800;
+    flex-shrink: 0;
+  }
+
+  .step-card h3 {
+    font-size: 1.15rem;
+    font-weight: 700;
+  }
+  .step-card .step-desc {
+    font-size: .85rem;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  /* ─── EVENT LOG ─── */
+  .event-log {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1rem;
+    height: 180px;
+    overflow: hidden;
+    position: relative;
+  }
+  .event-row {
+    display: flex;
+    align-items: center;
+    gap: .6rem;
+    padding: .35rem 0;
+    font-size: .78rem;
+    font-family: var(--mono);
+    border-bottom: 1px solid rgba(255,255,255,.04);
+    animation: slideInLeft .3s ease both;
+  }
+  .event-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+  .ev-green { background: var(--green); }
+  .ev-red   { background: var(--red); }
+  .ev-amber { background: var(--amber); }
+
+  /* ─── MODEL 1: SKILL BARS ─── */
+  .skill-grid {
+    display: flex;
+    flex-direction: column;
+    gap: .75rem;
+    margin-top: 1rem;
+  }
+
+  .skill-row {
+    display: grid;
+    grid-template-columns: 160px 1fr 56px;
+    align-items: center;
+    gap: .75rem;
+  }
+
+  .skill-name {
+    font-size: .78rem;
+    font-weight: 600;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .skill-bar-bg {
+    height: 10px;
+    background: var(--bg);
+    border-radius: 99px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+  }
+
+  .skill-bar-fill {
+    height: 100%;
+    border-radius: 99px;
+    width: 0%;
+    transition: width 1.2s cubic-bezier(.22,1,.36,1);
+  }
+
+  .skill-prob {
+    font-family: var(--mono);
+    font-size: .75rem;
+    font-weight: 600;
+    text-align: right;
+  }
+
+  .bar-low       { background: linear-gradient(90deg, #ef4444, #f97316); }
+  .bar-developing{ background: linear-gradient(90deg, #f59e0b, #eab308); }
+  .bar-high      { background: linear-gradient(90deg, #10b981, #06b6d4); }
+
+  .mastery-badge {
+    display: inline-block;
+    padding: .15rem .5rem;
+    border-radius: 6px;
+    font-size: .65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+  }
+  .badge-low       { background: rgba(239,68,68,.15);  color: #ef4444; }
+  .badge-developing{ background: rgba(245,158,11,.15); color: #f59e0b; }
+  .badge-high      { background: rgba(16,185,129,.15); color: #10b981; }
+
+  /* ─── MODEL 2: ENGAGEMENT ─── */
+  .engagement-viz {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+  }
+
+  .gauge-container {
+    position: relative;
+    width: 220px;
+    height: 130px;
+  }
+
+  #gauge-canvas { width: 100%; }
+
+  .gauge-label {
+    position: absolute;
+    bottom: 0; left: 50%;
+    transform: translateX(-50%);
+    text-align: center;
+  }
+  .gauge-state {
+    font-size: 1.4rem;
+    font-weight: 800;
+    display: block;
+  }
+  .gauge-sub { font-size: .72rem; color: var(--muted); }
+
+  .prob-bars-eng {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: .6rem;
+  }
+
+  .eng-row {
+    display: grid;
+    grid-template-columns: 90px 1fr 54px;
+    align-items: center;
+    gap: .75rem;
+  }
+  .eng-label { font-size: .78rem; font-weight: 600; }
+  .eng-bar-bg {
+    height: 8px;
+    background: var(--bg);
+    border-radius: 99px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+  }
+  .eng-bar-fill {
+    height: 100%;
+    border-radius: 99px;
+    width: 0%;
+    transition: width 1s cubic-bezier(.22,1,.36,1);
+  }
+  .eng-prob { font-family: var(--mono); font-size: .75rem; font-weight: 600; text-align: right; }
+
+  /* ─── FORMULA ENGINE ─── */
+  .formula-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 1rem;
+  }
+
+  .formula-card {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.1rem 1.2rem;
+    opacity: 0;
+    transform: scale(.95);
+    transition: opacity .5s ease, transform .5s ease, border-color .3s, box-shadow .3s;
+  }
+  .formula-card.lit {
+    opacity: 1;
+    transform: scale(1);
+  }
+  .formula-card.active-rule {
+    border-color: var(--green);
+    box-shadow: 0 0 20px rgba(16,185,129,.25);
+  }
+
+  .formula-condition {
+    font-family: var(--mono);
+    font-size: .78rem;
+    color: var(--amber);
+    margin-bottom: .5rem;
+    display: block;
+  }
+
+  .formula-action {
+    font-size: .82rem;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: .4rem;
+  }
+
+  .formula-why { font-size: .75rem; color: var(--muted); line-height: 1.5; }
+
+  /* ─── OUTPUT CARDS ─── */
+  .output-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.2rem;
+  }
+  @media(max-width:900px) { .output-grid { grid-template-columns: 1fr 1fr; } }
+  @media(max-width:600px) { .output-grid { grid-template-columns: 1fr; } }
+
+  .output-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity .5s ease, transform .5s ease;
+  }
+  .output-card.visible { opacity: 1; transform: translateY(0); }
+
+  .output-header {
+    padding: .9rem 1.2rem;
+    display: flex;
+    align-items: center;
+    gap: .6rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .output-header-icon { font-size: 1.1rem; }
+  .output-header-title { font-size: .85rem; font-weight: 700; }
+  .output-header-badge {
+    margin-left: auto;
+    font-size: .65rem;
+    font-weight: 700;
+    padding: .15rem .5rem;
+    border-radius: 6px;
+    text-transform: uppercase;
+  }
+
+  .json-viewer {
+    padding: 1rem;
+    font-family: var(--mono);
+    font-size: .73rem;
+    line-height: 1.7;
+    max-height: 200px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+  }
+
+  .j-key   { color: #7dd3fc; }
+  .j-str   { color: #86efac; }
+  .j-num   { color: #fde68a; }
+  .j-bool  { color: #f9a8d4; }
+  .j-null  { color: var(--muted); }
+  .j-punc  { color: var(--muted); }
+
+  /* ─── FLOW DIVIDERS ─── */
+  .flow-divider {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin: 0 auto 4rem;
+    max-width: 1200px;
+    padding: 0 2rem;
+    color: var(--muted);
+    font-size: .8rem;
+  }
+  .flow-divider::before, .flow-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* ─── FEATURE TABLE ─── */
+  .feat-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: .82rem;
+  }
+  .feat-table th {
+    background: var(--bg);
+    padding: .6rem 1rem;
+    text-align: left;
+    font-size: .72rem;
+    font-weight: 700;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    color: var(--muted);
+    border-bottom: 1px solid var(--border);
+  }
+  .feat-table td {
+    padding: .6rem 1rem;
+    border-bottom: 1px solid rgba(255,255,255,.04);
+  }
+  .feat-table tr:hover td { background: rgba(255,255,255,.02); }
+  .feat-val {
+    font-family: var(--mono);
+    color: var(--amber);
+    font-size: .78rem;
+  }
+
+  /* ─── TIMELINE ─── */
+  .timeline {
+    position: relative;
+    padding-left: 2.5rem;
+  }
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: .7rem;
+    top: 0; bottom: 0;
+    width: 2px;
+    background: linear-gradient(180deg, var(--indigo), var(--purple), var(--pink));
+  }
+
+  .timeline-item {
+    position: relative;
+    margin-bottom: 2rem;
+    opacity: 0;
+    transform: translateX(20px);
+    transition: opacity .5s ease, transform .5s ease;
+  }
+  .timeline-item.visible { opacity: 1; transform: translateX(0); }
+
+  .timeline-dot {
+    position: absolute;
+    left: -2.1rem;
+    top: .2rem;
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    border: 2px solid var(--indigo);
+    background: var(--bg);
+    box-shadow: 0 0 10px rgba(99,102,241,.5);
+  }
+  .timeline-dot.amber { border-color: var(--amber); box-shadow: 0 0 10px rgba(245,158,11,.5); }
+  .timeline-dot.green { border-color: var(--green); box-shadow: 0 0 10px rgba(16,185,129,.5); }
+
+  .timeline-title { font-size: .9rem; font-weight: 700; margin-bottom: .3rem; }
+  .timeline-body { font-size: .82rem; color: var(--muted); line-height: 1.6; }
+  .timeline-tag {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: .7rem;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    padding: .1rem .5rem;
+    border-radius: 6px;
+    margin-bottom: .4rem;
+    color: var(--cyan);
+  }
+
+  /* ─── LIVE SIM ─── */
+  .sim-section {
+    background: linear-gradient(135deg, rgba(99,102,241,.08), rgba(236,72,153,.08));
+    border: 1px solid rgba(99,102,241,.2);
+    border-radius: 24px;
+    padding: 4rem 2rem;
+    text-align: center;
+    margin: 0 2rem 5rem;
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .sim-pipeline {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding: 2rem 0 1rem;
+    margin: 0 auto;
+  }
+
+  .sim-node {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: .4rem;
+    flex-shrink: 0;
+  }
+
+  .sim-icon {
+    width: 56px; height: 56px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4rem;
+    border: 2px solid var(--border);
+    transition: border-color .3s, box-shadow .3s, transform .3s;
+    position: relative;
+  }
+
+  .sim-icon.processing {
+    border-color: var(--indigo);
+    box-shadow: 0 0 20px rgba(99,102,241,.5);
+    animation: node-pulse 1s ease infinite;
+  }
+  .sim-icon.done {
+    border-color: var(--green);
+    box-shadow: 0 0 16px rgba(16,185,129,.4);
+    transform: scale(1.08);
+  }
+
+  .sim-label { font-size: .68rem; color: var(--muted); font-weight: 600; max-width: 70px; text-align: center; }
+
+  .sim-arrow {
+    width: 36px;
+    height: 2px;
+    background: var(--border);
+    flex-shrink: 0;
+    margin-bottom: 1.2rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .sim-arrow::after {
+    content: '';
+    position: absolute;
+    top: 0; left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, var(--green));
+  }
+  .sim-arrow.active::after { animation: flow-line .8s ease forwards; }
+
+  .sim-log {
+    max-height: 120px;
+    overflow-y: auto;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: .8rem 1rem;
+    text-align: left;
+    margin: 1.5rem auto 0;
+    max-width: 600px;
+  }
+  .sim-log-entry {
+    font-family: var(--mono);
+    font-size: .75rem;
+    padding: .2rem 0;
+    animation: slideInLeft .3s ease both;
+  }
+  .log-ts  { color: var(--muted); }
+  .log-ok  { color: var(--green); }
+  .log-ml  { color: var(--indigo); }
+  .log-fmt { color: var(--amber); }
+  .log-out { color: var(--pink); }
+
+  /* ─── FOOTER ─── */
+  footer {
+    text-align: center;
+    padding: 3rem 2rem;
+    color: var(--muted);
+    font-size: .82rem;
+    border-top: 1px solid var(--border);
+  }
+  footer strong { color: var(--text); }
+
+  /* ─── ANIMATIONS ─── */
+  @keyframes fadeDown {
+    from { opacity: 0; transform: translateY(-20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes slideInLeft {
+    from { opacity: 0; transform: translateX(-16px); }
+    to   { opacity: 1; transform: translateX(0); }
+  }
+  @keyframes bounce {
+    0%,100% { transform: translateX(-50%) translateY(0); }
+    50%      { transform: translateX(-50%) translateY(8px); }
+  }
+  @keyframes pulse-glow {
+    0%,100% { box-shadow: 0 0 0 0 rgba(99,102,241,0); }
+    50%      { box-shadow: 0 0 30px 6px rgba(99,102,241,.4); }
+  }
+  @keyframes flow-line {
+    from { left: -100%; }
+    to   { left: 100%; }
+  }
+  @keyframes node-pulse {
+    0%,100% { box-shadow: 0 0 0 0 rgba(99,102,241,0); }
+    50%      { box-shadow: 0 0 24px 6px rgba(99,102,241,.5); }
+  }
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  .spinning { animation: spin 1s linear infinite; display: inline-block; }
+
+  /* ─── PROGRESS BAR ─── */
+  .progress-bar-top {
+    position: fixed;
+    top: 0; left: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--indigo), var(--purple), var(--pink));
+    z-index: 999;
+    transition: width .1s linear;
+    width: 0%;
+  }
+
+  /* ─── NAV ─── */
+  .nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    padding: .8rem 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: rgba(7,9,26,.8);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid rgba(255,255,255,.06);
+  }
+  .nav-logo {
+    font-weight: 800;
+    font-size: .9rem;
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+  }
+  .nav-logo .dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--green);
+    box-shadow: 0 0 8px var(--green);
+    animation: pulse-glow 2s ease infinite;
+  }
+  .nav-steps {
+    display: flex;
+    gap: 1.5rem;
+    font-size: .78rem;
+    color: var(--muted);
+    font-weight: 500;
+  }
+  .nav-steps a { color: inherit; text-decoration: none; transition: color .2s; }
+  .nav-steps a:hover { color: var(--text); }
+
+  @media(max-width:640px) { .nav-steps { display: none; } }
+
+  /* highlight */
+  .hl-blue   { color: var(--blue);   }
+  .hl-indigo { color: var(--indigo); }
+  .hl-amber  { color: var(--amber);  }
+  .hl-green  { color: var(--green);  }
+  .hl-pink   { color: var(--pink);   }
+  .hl-cyan   { color: var(--cyan);   }
+  .hl-purple { color: var(--purple); }
+  .hl-red    { color: var(--red);    }
+
+  .tag {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: .72rem;
+    background: rgba(99,102,241,.1);
+    border: 1px solid rgba(99,102,241,.3);
+    color: var(--indigo);
+    padding: .1rem .45rem;
+    border-radius: 5px;
+  }
+  .tag-amber {
+    background: rgba(245,158,11,.1);
+    border-color: rgba(245,158,11,.3);
+    color: var(--amber);
+  }
+  .tag-green {
+    background: rgba(16,185,129,.1);
+    border-color: rgba(16,185,129,.3);
+    color: var(--green);
+  }
+  .tag-pink {
+    background: rgba(236,72,153,.1);
+    border-color: rgba(236,72,153,.3);
+    color: var(--pink);
+  }
+
+  .info-box {
+    background: rgba(59,130,246,.06);
+    border: 1px solid rgba(59,130,246,.2);
+    border-left: 3px solid var(--blue);
+    border-radius: 8px;
+    padding: .9rem 1.1rem;
+    font-size: .82rem;
+    color: #94a3b8;
+    line-height: 1.6;
+    margin-top: 1rem;
+  }
+
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    align-items: start;
+  }
+  @media(max-width:768px) { .two-col { grid-template-columns: 1fr; } }
+
+  .comparison-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: .82rem;
+    margin-top: 1rem;
+  }
+  .comparison-table th {
+    padding: .7rem 1rem;
+    text-align: left;
+    background: var(--bg);
+    font-size: .72rem;
+    font-weight: 700;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    color: var(--muted);
+    border-bottom: 1px solid var(--border);
+  }
+  .comparison-table td {
+    padding: .65rem 1rem;
+    border-bottom: 1px solid rgba(255,255,255,.04);
+    vertical-align: top;
+    line-height: 1.5;
+  }
+  .comparison-table tr:hover td { background: rgba(255,255,255,.015); }
+</style>
+</head>
+<body>
+
+<div class="progress-bar-top" id="progress-bar"></div>
+
+<nav class="nav">
+  <div class="nav-logo"><div class="dot"></div> Adaptive Learning Engine</div>
+  <div class="nav-steps">
+    <a href="#overview">Overview</a>
+    <a href="#onboarding">Onboarding</a>
+    <a href="#model1">Model 1</a>
+    <a href="#model2">Model 2</a>
+    <a href="#formula">Formula Engine</a>
+    <a href="#outputs">Outputs</a>
+    <a href="#simulate">Simulate</a>
+  </div>
+</nav>
+
+<!-- ═══════════════════════════════ HERO ═══════════════════════════════ -->
+<div class="hero" id="hero">
+  <canvas id="hero-canvas"></canvas>
+  <div class="hero-content">
+    <div class="hero-badge">
+      <svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor"><circle cx="5" cy="5" r="5"/></svg>
+      Hackathon-Grade System
+    </div>
+    <h1>
+      <span class="grad-text">Adaptive Learning</span><br>
+      Intelligence Engine
+    </h1>
+    <p>
+      A complete ML pipeline for children's educational mini-games.
+      Exactly 2 XGBoost models. Everything else is formula-based, deterministic, and explainable.
+    </p>
+    <div class="hero-pills">
+      <span class="pill pill-indigo">11 Skill Nodes</span>
+      <span class="pill pill-amber">Engagement Detection</span>
+      <span class="pill pill-green">Formula Engine</span>
+      <span class="pill pill-pink">Parent Dashboard</span>
+      <span class="pill pill-blue">XGBoost × 2</span>
+    </div>
+    <button class="simulate-btn" onclick="document.getElementById('simulate').scrollIntoView({behavior:'smooth'})">
+      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+      Run Live Simulation
+    </button>
+  </div>
+  <div class="scroll-hint">
+    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+    Scroll to explore
+  </div>
+</div>
+
+<!-- ════════════════════════ PIPELINE OVERVIEW ════════════════════════ -->
+<section id="overview">
+  <div class="section-label"><span></span> Architecture</div>
+  <h2 class="section-title">The Complete <span class="grad-text">Pipeline</span></h2>
+  <p class="section-sub">
+    8 stages from parent onboarding to personalised child experience.
+    Only stages 4 and 5 use machine learning. Everything else is rule-based and auditable.
+  </p>
+
+  <div class="pipeline-container">
+    <div class="pipeline-row" id="pipe-row">
+      <div class="pipe-node">
+        <div class="pipe-icon icon-pink">👨‍👩‍👧</div>
+        <span class="pipe-label">Parent Onboarding</span>
+      </div>
+      <div class="pipe-arrow"><div class="arrow-line flowing"></div><div class="arrow-head"></div></div>
+      <div class="pipe-node">
+        <div class="pipe-icon icon-blue">🎮</div>
+        <span class="pipe-label">Gameplay Events</span>
+      </div>
+      <div class="pipe-arrow"><div class="arrow-line flowing"></div><div class="arrow-head"></div></div>
+      <div class="pipe-node">
+        <div class="pipe-icon icon-cyan">⚙️</div>
+        <span class="pipe-label">Feature Engineering</span>
+      </div>
+      <div class="pipe-arrow"><div class="arrow-line flowing"></div><div class="arrow-head"></div></div>
+      <div class="pipe-node">
+        <div class="pipe-icon icon-indigo">🧠</div>
+        <span class="pipe-label" style="color:var(--indigo)">Model 1<br>Skill Mastery</span>
+      </div>
+      <div class="pipe-arrow"><div class="arrow-line flowing"></div><div class="arrow-head"></div></div>
+      <div class="pipe-node">
+        <div class="pipe-icon icon-amber">⚡</div>
+        <span class="pipe-label" style="color:var(--amber)">Model 2<br>Engagement</span>
+      </div>
+      <div class="pipe-arrow"><div class="arrow-line flowing"></div><div class="arrow-head"></div></div>
+      <div class="pipe-node">
+        <div class="pipe-icon icon-green">📐</div>
+        <span class="pipe-label" style="color:var(--green)">Formula Engine</span>
+      </div>
+      <div class="pipe-arrow"><div class="arrow-line flowing"></div><div class="arrow-head"></div></div>
+      <div class="pipe-node">
+        <div class="pipe-icon icon-purple">🌐</div>
+        <span class="pipe-label">Skill Graph Update</span>
+      </div>
+      <div class="pipe-arrow"><div class="arrow-line flowing"></div><div class="arrow-head"></div></div>
+      <div class="pipe-node">
+        <div class="pipe-icon icon-pink">📊</div>
+        <span class="pipe-label">Parent Dashboard</span>
+      </div>
+    </div>
+  </div>
+
+  <div style="margin-top:2rem">
+    <table class="comparison-table" style="background:var(--card);border-radius:14px;overflow:hidden;border:1px solid var(--border)">
+      <thead>
+        <tr>
+          <th>Stage</th>
+          <th>Type</th>
+          <th>What it does</th>
+          <th>Output</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>Parent Onboarding</td><td><span class="tag-green tag">Rule-based</span></td><td>Collect child age, interests, goals, sensitivities</td><td>Starter profile JSON</td></tr>
+        <tr><td>Gameplay Events</td><td><span class="tag-green tag">Rule-based</span></td><td>Game engine streams events per task attempt</td><td>Event log array</td></tr>
+        <tr><td>Feature Engineering</td><td><span class="tag-green tag">Rule-based</span></td><td>Compute 30+ mathematical features from event history</td><td>Feature vectors</td></tr>
+        <tr><td>Skill Mastery Model</td><td><span class="tag">ML — XGBoost</span></td><td>Estimate P(mastered) for each of 11 skills</td><td>Mastery probabilities</td></tr>
+        <tr><td>Engagement Model</td><td><span class="tag-amber tag">ML — XGBoost</span></td><td>Classify current engagement as engaged/neutral/fatigued</td><td>Engagement state + fatigue risk</td></tr>
+        <tr><td>Formula Engine</td><td><span class="tag-green tag">Rule-based</span></td><td>Apply deterministic rules to choose next action</td><td>Next activity JSON</td></tr>
+        <tr><td>Skill Graph Update</td><td><span class="tag-green tag">Rule-based</span></td><td>EMA-smooth new probabilities into profile</td><td>Updated skill graph</td></tr>
+        <tr><td>Parent Dashboard</td><td><span class="tag-green tag">Rule-based</span></td><td>Convert numbers into plain English parent insights</td><td>Parent summary JSON</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<div class="flow-divider">Step 1 — Onboarding</div>
+
+<!-- ════════════════════════ ONBOARDING ════════════════════════ -->
+<section id="onboarding">
+  <div class="section-label"><span></span> Stage 1</div>
+  <h2 class="section-title">Parent <span class="hl-pink">Onboarding</span></h2>
+  <p class="section-sub">
+    Before any ML runs, a parent fills out a short questionnaire.
+    The system uses these answers to build a zero-data starter profile with developmental priors.
+  </p>
+
+  <div class="two-col">
+    <div>
+      <div class="step-card visible" style="padding:0;overflow:hidden">
+        <div style="background:var(--bg2);padding:1rem 1.2rem;border-bottom:1px solid var(--border);font-size:.78rem;font-weight:700;color:var(--muted);letter-spacing:.08em;text-transform:uppercase">Onboarding Form</div>
+        <div style="padding:1.5rem;display:flex;flex-direction:column;gap:1rem;" id="onboard-form">
+          <div class="form-field" style="opacity:0;transform:translateY(10px);transition:all .4s ease">
+            <div style="font-size:.72rem;color:var(--muted);font-weight:700;margin-bottom:.3rem;text-transform:uppercase;letter-spacing:.06em">Child's Name</div>
+            <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:.55rem .9rem;font-size:.9rem;color:var(--text)">Aarav <span class="cursor-blink">|</span></div>
+          </div>
+          <div class="form-field" style="opacity:0;transform:translateY(10px);transition:all .4s .1s ease">
+            <div style="font-size:.72rem;color:var(--muted);font-weight:700;margin-bottom:.3rem;text-transform:uppercase;letter-spacing:.06em">Age</div>
+            <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:.55rem .9rem;font-size:.9rem;color:var(--amber)">5.5 years <span style="color:var(--muted);font-size:.78rem">→ preschool band</span></div>
+          </div>
+          <div class="form-field" style="opacity:0;transform:translateY(10px);transition:all .4s .2s ease">
+            <div style="font-size:.72rem;color:var(--muted);font-weight:700;margin-bottom:.3rem;text-transform:uppercase;letter-spacing:.06em">Interests</div>
+            <div style="display:flex;gap:.5rem;flex-wrap:wrap">
+              <span class="pill pill-pink">animals</span>
+              <span class="pill pill-blue">music</span>
+              <span class="pill pill-indigo">stories</span>
+            </div>
+          </div>
+          <div class="form-field" style="opacity:0;transform:translateY(10px);transition:all .4s .3s ease">
+            <div style="font-size:.72rem;color:var(--muted);font-weight:700;margin-bottom:.3rem;text-transform:uppercase;letter-spacing:.06em">Goals</div>
+            <div style="display:flex;gap:.5rem;flex-wrap:wrap">
+              <span class="pill pill-green">improve counting</span>
+              <span class="pill pill-green">learn phonics</span>
+            </div>
+          </div>
+          <div class="form-field" style="opacity:0;transform:translateY(10px);transition:all .4s .4s ease">
+            <div style="font-size:.72rem;color:var(--muted);font-weight:700;margin-bottom:.3rem;text-transform:uppercase;letter-spacing:.06em">Session Time</div>
+            <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:.55rem .9rem;font-size:.9rem;color:var(--green)">15 minutes</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <h4 style="font-size:1rem;font-weight:700;margin-bottom:1rem;color:var(--muted)">What happens with this data?</h4>
+      <div class="timeline" id="onboard-timeline">
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="timeline-tag">age_band = "preschool"</div>
+          <div class="timeline-title">Age → Developmental Band</div>
+          <div class="timeline-body">5.5 years maps to the <strong>preschool</strong> band. This selects the correct developmental milestone priors for all 11 skills.</div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot amber"></div>
+          <div class="timeline-tag">preferred_modality = "auditory"</div>
+          <div class="timeline-title">Interests → Preferred Modality</div>
+          <div class="timeline-body">music + stories → <strong>auditory modality</strong> preferred. The game engine will serve audio-first tasks by default.</div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot green"></div>
+          <div class="timeline-tag">phonics + counting priors boosted +0.05</div>
+          <div class="timeline-title">Goals → Prior Adjustment</div>
+          <div class="timeline-body">Stated goals suggest <em>focus areas</em>, not mastery. A tiny +0.05 adjustment signals these should be prioritised first in the session plan.</div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="timeline-tag">confidence = 0.40 (cold start)</div>
+          <div class="timeline-title">All Estimates Are Uncertain</div>
+          <div class="timeline-body">No gameplay data yet. Every skill estimate carries confidence = 0.40 — the formula engine knows not to trust these as strongly as real gameplay data.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="flow-divider">Step 2 — Gameplay Events</div>
+
+<!-- ════════════════════════ EVENTS ════════════════════════ -->
+<section id="events-section">
+  <div class="section-label"><span></span> Stage 2</div>
+  <h2 class="section-title">Gameplay <span class="hl-blue">Events</span></h2>
+  <p class="section-sub">The game engine emits one event per task attempt. These raw events are the only data the ML system ever sees — no video, no audio, no camera.</p>
+
+  <div class="two-col">
+    <div>
+      <div style="font-size:.78rem;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:.8rem">Live Event Stream</div>
+      <div class="event-log" id="event-log"></div>
+      <div class="info-box">Each event fires when a child completes one task — a match, a sort, a trace. The system accumulates a rolling window of the last 20 events for feature extraction.</div>
+    </div>
+    <div>
+      <div style="font-size:.78rem;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:.8rem">Event Schema</div>
+      <table class="feat-table" style="background:var(--card);border-radius:12px;overflow:hidden;border:1px solid var(--border)">
+        <thead><tr><th>Field</th><th>Type</th><th>Captures</th></tr></thead>
+        <tbody>
+          <tr><td>skill</td><td><span class="feat-val">string</span></td><td>Which of 11 skills was practised</td></tr>
+          <tr><td>correct</td><td><span class="feat-val">bool</span></td><td>Did the child answer correctly?</td></tr>
+          <tr><td>response_time_ms</td><td><span class="feat-val">float</span></td><td>Time from task shown to answer</td></tr>
+          <tr><td>retry_count</td><td><span class="feat-val">int</span></td><td>How many attempts needed</td></tr>
+          <tr><td>hint_used</td><td><span class="feat-val">bool</span></td><td>Did child ask for a hint?</td></tr>
+          <tr><td>pause_duration_ms</td><td><span class="feat-val">float</span></td><td>Gap before first interaction</td></tr>
+          <tr><td>modality</td><td><span class="feat-val">string</span></td><td>visual / auditory / kinesthetic</td></tr>
+          <tr><td>reward_response</td><td><span class="feat-val">float</span></td><td>Enthusiasm after reward (0–1)</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<div class="flow-divider">Step 3 — Feature Engineering</div>
+
+<!-- ════════════════════════ FEATURES ════════════════════════ -->
+<section id="features-section">
+  <div class="section-label"><span></span> Stage 3</div>
+  <h2 class="section-title">Feature <span class="hl-cyan">Engineering</span></h2>
+  <p class="section-sub">Raw events are meaningless to a model. Feature engineering computes meaningful signals — trends, rates, patterns — from the event history. This is where the intelligence lives, even before ML.</p>
+
+  <div class="step-grid">
+    <div class="step-card visible">
+      <div class="step-header">
+        <div class="step-num" style="background:rgba(6,182,212,.15);color:var(--cyan)">📊</div>
+        <div>
+          <h3>Skill Features <span style="color:var(--muted);font-weight:400;font-size:.85rem">(Model 1 input)</span></h3>
+          <p class="step-desc">Per-skill features computed from that skill's event history only</p>
+        </div>
+      </div>
+      <table class="feat-table">
+        <thead><tr><th>Feature</th><th>Example value</th><th>Signal</th></tr></thead>
+        <tbody id="skill-feat-table">
+          <tr><td>accuracy_last_5</td><td><span class="feat-val" id="sf1">—</span></td><td>Recent short-term performance</td></tr>
+          <tr><td>accuracy_last_10</td><td><span class="feat-val" id="sf2">—</span></td><td>Medium-term trend</td></tr>
+          <tr><td>response_time_trend</td><td><span class="feat-val" id="sf3">—</span></td><td>Speeding up (mastering) or slowing?</td></tr>
+          <tr><td>hint_usage_rate</td><td><span class="feat-val" id="sf4">—</span></td><td>Hint dependency level</td></tr>
+          <tr><td>current_streak</td><td><span class="feat-val" id="sf5">—</span></td><td>Consecutive correct answers now</td></tr>
+          <tr><td>error_burst_count</td><td><span class="feat-val" id="sf6">—</span></td><td>Times 3+ errors happened in a row</td></tr>
+          <tr><td>visual_success_rate</td><td><span class="feat-val" id="sf7">—</span></td><td>Success rate on visual tasks specifically</td></tr>
+          <tr><td>prior_mastery_prob</td><td><span class="feat-val" id="sf8">—</span></td><td>What the profile already knew</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="step-card visible">
+      <div class="step-header">
+        <div class="step-num" style="background:rgba(245,158,11,.15);color:var(--amber)">⚡</div>
+        <div>
+          <h3>Engagement Features <span style="color:var(--muted);font-weight:400;font-size:.85rem">(Model 2 input)</span></h3>
+          <p class="step-desc">Session-level features computed from the current session window</p>
+        </div>
+      </div>
+      <table class="feat-table">
+        <thead><tr><th>Feature</th><th>Example value</th><th>Signal</th></tr></thead>
+        <tbody id="eng-feat-table">
+          <tr><td>response_time_trend</td><td><span class="feat-val" id="ef1">—</span></td><td><strong style="color:var(--amber)">#1 signal (35.5%)</strong> — slowing = tired</td></tr>
+          <tr><td>error_rate_last_5</td><td><span class="feat-val" id="ef2">—</span></td><td>Errors spiking = attention dropping</td></tr>
+          <tr><td>pause_duration_max</td><td><span class="feat-val" id="ef3">—</span></td><td>Long pauses = zoning out</td></tr>
+          <tr><td>hint_usage_rate_session</td><td><span class="feat-val" id="ef4">—</span></td><td>Rising hints = child struggling</td></tr>
+          <tr><td>session_duration_ratio</td><td><span class="feat-val" id="ef5">—</span></td><td>Later in session = more likely tired</td></tr>
+          <tr><td>reward_response_mean</td><td><span class="feat-val" id="ef6">—</span></td><td>Tired children stop caring about rewards</td></tr>
+          <tr><td>streak_break_count</td><td><span class="feat-val" id="ef7">—</span></td><td>Inconsistency = fatigue signal</td></tr>
+          <tr><td>tasks_per_minute</td><td><span class="feat-val" id="ef8">—</span></td><td>Slowing pace = fatigue</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<div class="flow-divider">Step 4 — ML Model 1</div>
+
+<!-- ════════════════════════ MODEL 1 ════════════════════════ -->
+<section id="model1">
+  <div class="section-label"><span></span> Stage 4 — Machine Learning</div>
+  <h2 class="section-title">Model 1: Skill <span class="hl-indigo">Mastery</span> Classifier</h2>
+  <p class="section-sub">
+    11 independent XGBoost classifiers — one per skill. Each answers the same question for its skill:
+    <strong>"What is the probability this child has mastered this skill right now?"</strong>
+  </p>
+
+  <div class="step-grid" style="margin-bottom:2rem">
+    <div class="step-card visible">
+      <div class="step-header">
+        <div class="step-num" style="background:rgba(99,102,241,.15);color:var(--indigo)">🧠</div>
+        <div>
+          <h3>Architecture</h3>
+          <p class="step-desc">Why 11 separate models instead of one?</p>
+        </div>
+      </div>
+      <div class="timeline" style="padding-left:2rem">
+        <div class="timeline-item visible">
+          <div class="timeline-dot"></div>
+          <div class="timeline-title hl-indigo">Independence of Evidence</div>
+          <div class="timeline-body">A child can be great at Color Sorting (visual) but terrible at Phonics (auditory). One combined model would let counting performance corrupt phonics predictions. Separate models = clean estimates.</div>
+        </div>
+        <div class="timeline-item visible">
+          <div class="timeline-dot amber"></div>
+          <div class="timeline-title hl-amber">Cold Start Per Skill</div>
+          <div class="timeline-body">Each skill has its own data sparsity. A child may have 50 counting events but 3 phonics events. Each model handles its own cold start with age-band priors independently.</div>
+        </div>
+        <div class="timeline-item visible">
+          <div class="timeline-dot green"></div>
+          <div class="timeline-title hl-green">Calibration Per Skill</div>
+          <div class="timeline-body">Isotonic calibration is fitted separately per skill. A threshold of 0.70 means "70% probability mastered" — and that is actually true because calibration enforces it.</div>
+        </div>
+      </div>
+    </div>
+    <div class="step-card visible">
+      <div class="step-header">
+        <div class="step-num" style="background:rgba(99,102,241,.15);color:var(--indigo)">⚙️</div>
+        <div><h3>XGBoost Configuration</h3><p class="step-desc">Key hyperparameters and why</p></div>
+      </div>
+      <table class="feat-table">
+        <thead><tr><th>Parameter</th><th>Value</th><th>Why</th></tr></thead>
+        <tbody>
+          <tr><td>objective</td><td><span class="feat-val">binary:logistic</span></td><td>Output probability, not raw score</td></tr>
+          <tr><td>max_depth</td><td><span class="feat-val">4</span></td><td>Shallow = interpretable, low overfit</td></tr>
+          <tr><td>n_estimators</td><td><span class="feat-val">150</span></td><td>Enough trees for small datasets</td></tr>
+          <tr><td>learning_rate</td><td><span class="feat-val">0.05</span></td><td>Small = stable with calibration</td></tr>
+          <tr><td>scale_pos_weight</td><td><span class="feat-val">auto</span></td><td>Fix class imbalance (not all kids mastered all skills)</td></tr>
+          <tr><td>calibration</td><td><span class="feat-val">isotonic cv=3</span></td><td>Makes probabilities trustworthy</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- LIVE SKILL BARS -->
+  <div class="step-card full-width visible" id="skill-mastery-card">
+    <div class="step-header">
+      <div class="step-num" style="background:rgba(99,102,241,.15);color:var(--indigo)">📈</div>
+      <div><h3>Live Mastery Output — Aarav, Session 2</h3><p class="step-desc">Calibrated P(mastered) per skill. Hover a bar for interpretation.</p></div>
+      <button onclick="animateSkillBars()" style="margin-left:auto;background:rgba(99,102,241,.15);border:1px solid rgba(99,102,241,.3);color:var(--indigo);padding:.4rem .9rem;border-radius:8px;cursor:pointer;font-size:.78rem;font-weight:600">Re-run Model</button>
+    </div>
+    <div class="skill-grid" id="skill-bars"></div>
+  </div>
+</section>
+
+<div class="flow-divider">Step 5 — ML Model 2</div>
+
+<!-- ════════════════════════ MODEL 2 ════════════════════════ -->
+<section id="model2">
+  <div class="section-label"><span></span> Stage 5 — Machine Learning</div>
+  <h2 class="section-title">Model 2: Engagement & <span class="hl-amber">Fatigue</span> Classifier</h2>
+  <p class="section-sub">
+    One XGBoost classifier with 3 output classes: <span class="hl-green">Engaged</span>, <span class="hl-amber">Neutral</span>, and <span class="hl-red">Fatigued</span>.
+    It reads the current session temperature — completely separate from skill ability.
+  </p>
+
+  <div class="two-col" style="margin-bottom:2rem">
+    <div>
+      <div class="step-card visible">
+        <div class="step-header">
+          <div class="step-num" style="background:rgba(245,158,11,.15);color:var(--amber)">🔥</div>
+          <div><h3>Why a Separate Model?</h3></div>
+        </div>
+        <div class="info-box" style="background:rgba(245,158,11,.06);border-color:rgba(245,158,11,.2);border-left-color:var(--amber)">
+          <strong style="color:var(--amber)">Ability ≠ State.</strong> A child with high counting mastery (Model 1) can still be exhausted right now (Model 2). Mixing them would corrupt both. Model 1 measures <em>what the child can do</em>. Model 2 measures <em>how the child is doing right now</em>.
+        </div>
+        <div style="margin-top:1.2rem">
+          <div style="font-size:.78rem;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:.75rem">Top Predictive Features</div>
+          <div style="display:flex;flex-direction:column;gap:.5rem">
+            <div style="display:flex;justify-content:space-between;font-size:.8rem">
+              <span>response_time_trend</span>
+              <span style="display:flex;align-items:center;gap:.5rem"><div style="width:120px;height:8px;border-radius:4px;background:var(--bg);overflow:hidden;border:1px solid var(--border)"><div style="width:90%;height:100%;background:var(--amber);border-radius:4px"></div></div><span class="hl-amber">35.5%</span></span>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:.8rem">
+              <span>response_time_last3_mean</span>
+              <span style="display:flex;align-items:center;gap:.5rem"><div style="width:120px;height:8px;border-radius:4px;background:var(--bg);overflow:hidden;border:1px solid var(--border)"><div style="width:45%;height:100%;background:var(--amber);border-radius:4px"></div></div><span class="hl-amber">16.7%</span></span>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:.8rem">
+              <span>time_to_first_response_trend</span>
+              <span style="display:flex;align-items:center;gap:.5rem"><div style="width:120px;height:8px;border-radius:4px;background:var(--bg);overflow:hidden;border:1px solid var(--border)"><div style="width:26%;height:100%;background:var(--amber);border-radius:4px"></div></div><span class="hl-amber">9.6%</span></span>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:.8rem">
+              <span>error_rate_last_5</span>
+              <span style="display:flex;align-items:center;gap:.5rem"><div style="width:120px;height:8px;border-radius:4px;background:var(--bg);overflow:hidden;border:1px solid var(--border)"><div style="width:25%;height:100%;background:var(--amber);border-radius:4px"></div></div><span class="hl-amber">9.6%</span></span>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:.8rem">
+              <span>hint_usage_rate_session</span>
+              <span style="display:flex;align-items:center;gap:.5rem"><div style="width:120px;height:8px;border-radius:4px;background:var(--bg);overflow:hidden;border:1px solid var(--border)"><div style="width:21%;height:100%;background:var(--amber);border-radius:4px"></div></div><span class="hl-amber">8.1%</span></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="step-card visible">
+        <div class="step-header">
+          <div class="step-num" style="background:rgba(245,158,11,.15);color:var(--amber)">🎯</div>
+          <div><h3>Live Engagement Output</h3><p class="step-desc">Calibrated probabilities from the 3-class classifier</p></div>
+          <button onclick="animateEngagement()" style="margin-left:auto;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.3);color:var(--amber);padding:.4rem .9rem;border-radius:8px;cursor:pointer;font-size:.78rem;font-weight:600">Cycle States</button>
+        </div>
+        <div class="engagement-viz">
+          <div class="gauge-container">
+            <canvas id="gauge-canvas" width="220" height="130"></canvas>
+            <div class="gauge-label">
+              <span class="gauge-state" id="gauge-state-text">—</span>
+              <span class="gauge-sub" id="gauge-sub-text">fatigue risk: —</span>
+            </div>
+          </div>
+          <div class="prob-bars-eng" id="eng-bars">
+            <div class="eng-row">
+              <span class="eng-label hl-red">Fatigued</span>
+              <div class="eng-bar-bg"><div class="eng-bar-fill" id="bar-fat" style="background:var(--red)"></div></div>
+              <span class="eng-prob hl-red" id="prob-fat">—</span>
+            </div>
+            <div class="eng-row">
+              <span class="eng-label hl-amber">Neutral</span>
+              <div class="eng-bar-bg"><div class="eng-bar-fill" id="bar-neu" style="background:var(--amber)"></div></div>
+              <span class="eng-prob hl-amber" id="prob-neu">—</span>
+            </div>
+            <div class="eng-row">
+              <span class="eng-label hl-green">Engaged</span>
+              <div class="eng-bar-bg"><div class="eng-bar-fill" id="bar-eng" style="background:var(--green)"></div></div>
+              <span class="eng-prob hl-green" id="prob-eng">—</span>
+            </div>
+          </div>
+          <div id="alert-badge" style="font-size:.78rem;padding:.3rem .8rem;border-radius:8px;font-weight:700;display:none"></div>
+        </div>
+
+        <div style="margin-top:1.5rem;padding-top:1.2rem;border-top:1px solid var(--border)">
+          <div style="font-size:.78rem;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:.75rem">Alert Threshold Rules (formula — not ML)</div>
+          <div style="display:flex;flex-direction:column;gap:.5rem">
+            <div style="display:flex;align-items:center;gap:.75rem;font-size:.82rem">
+              <div style="width:12px;height:12px;border-radius:3px;background:var(--red);flex-shrink:0"></div>
+              <span><span class="hl-red">fatigue_risk &ge; 0.80</span> → <strong>HARD STOP</strong> — end session immediately</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:.75rem;font-size:.82rem">
+              <div style="width:12px;height:12px;border-radius:3px;background:var(--amber);flex-shrink:0"></div>
+              <span><span class="hl-amber">fatigue_risk &ge; 0.60</span> → <strong>SOFT ALERT</strong> — shorten tasks, switch modality</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:.75rem;font-size:.82rem">
+              <div style="width:12px;height:12px;border-radius:3px;background:var(--green);flex-shrink:0"></div>
+              <span><span class="hl-green">fatigue_risk &lt; 0.60</span> → <strong>CONTINUE</strong> — maintain session plan</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="flow-divider">Step 6 — Formula Engine</div>
+
+<!-- ════════════════════════ FORMULA ENGINE ════════════════════════ -->
+<section id="formula">
+  <div class="section-label"><span></span> Stage 6 — Deterministic</div>
+  <h2 class="section-title">Formula <span class="hl-green">Engine</span></h2>
+  <p class="section-sub">
+    The ML models never make product decisions directly. The Formula Engine reads their outputs and applies transparent, auditable rules to choose the next action.
+    <strong>Zero ML here.</strong>
+  </p>
+
+  <div style="display:flex;align-items:center;gap:1rem;margin-bottom:2rem;padding:1rem 1.5rem;background:rgba(16,185,129,.06);border:1px solid rgba(16,185,129,.2);border-radius:12px">
+    <span style="font-size:1.5rem">🔑</span>
+    <div>
+      <div style="font-size:.9rem;font-weight:700;color:var(--green);margin-bottom:.2rem">The Core Principle</div>
+      <div style="font-size:.82rem;color:var(--muted);line-height:1.5">ML tells you <em>the state of the world</em>. Business logic decides <em>what to do about it</em>. Never let a model make a product decision directly — that's how you get unsafe, unexplainable outcomes in a child-facing product.</div>
+    </div>
+  </div>
+
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
+    <div style="font-size:.78rem;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.06em">Decision Rules</div>
+    <button onclick="animateFormulas()" style="background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.3);color:var(--green);padding:.4rem .9rem;border-radius:8px;cursor:pointer;font-size:.78rem;font-weight:600">Activate Rules</button>
+  </div>
+
+  <div class="formula-grid" id="formula-grid"></div>
+
+  <!-- Decision chain -->
+  <div class="step-card full-width visible" style="margin-top:2rem">
+    <div class="step-header">
+      <div class="step-num" style="background:rgba(16,185,129,.15);color:var(--green)">🔗</div>
+      <div><h3>Live Decision Chain — Aarav's Next Activity</h3><p class="step-desc">Watch the formula engine work through each decision sequentially</p></div>
+      <button onclick="runDecisionChain()" style="margin-left:auto;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.3);color:var(--green);padding:.4rem .9rem;border-radius:8px;cursor:pointer;font-size:.78rem;font-weight:600">Run Chain</button>
+    </div>
+    <div id="decision-chain" style="font-family:var(--mono);font-size:.78rem;display:flex;flex-direction:column;gap:.4rem;padding:.5rem 0"></div>
+  </div>
+</section>
+
+<div class="flow-divider">Steps 7 & 8 — Outputs</div>
+
+<!-- ════════════════════════ OUTPUTS ════════════════════════ -->
+<section id="outputs">
+  <div class="section-label"><span></span> Stage 7 & 8</div>
+  <h2 class="section-title">System <span class="hl-pink">Outputs</span></h2>
+  <p class="section-sub">Six JSON documents produced per session. All parent-facing text is rule-generated — no raw ML numbers are ever shown on the parent dashboard.</p>
+
+  <div class="output-grid" id="output-grid"></div>
+</section>
+
+<!-- ════════════════════════ LIVE SIMULATION ════════════════════════ -->
+<section id="simulate" style="max-width:1200px;margin:0 auto;padding:2rem 2rem 5rem">
+  <div class="sim-section">
+    <div class="section-label" style="justify-content:center"><span></span> End-to-End</div>
+    <h2 class="section-title" style="text-align:center">Live Pipeline <span class="grad-text">Simulation</span></h2>
+    <p style="color:var(--muted);max-width:520px;margin:0 auto 2rem;font-size:.95rem;line-height:1.7;text-align:center">
+      Watch every stage activate in sequence — from gameplay events to parent summary — in real time.
+    </p>
+
+    <div class="sim-pipeline" id="sim-pipeline">
+      <div class="sim-node"><div class="sim-icon" id="sn0">👨‍👩‍👧</div><span class="sim-label">Onboarding</span></div>
+      <div class="sim-arrow" id="sa0"></div>
+      <div class="sim-node"><div class="sim-icon" id="sn1">🎮</div><span class="sim-label">Events</span></div>
+      <div class="sim-arrow" id="sa1"></div>
+      <div class="sim-node"><div class="sim-icon" id="sn2">⚙️</div><span class="sim-label">Features</span></div>
+      <div class="sim-arrow" id="sa2"></div>
+      <div class="sim-node"><div class="sim-icon" id="sn3" style="background:rgba(99,102,241,.1)">🧠</div><span class="sim-label">Model 1</span></div>
+      <div class="sim-arrow" id="sa3"></div>
+      <div class="sim-node"><div class="sim-icon" id="sn4" style="background:rgba(245,158,11,.1)">⚡</div><span class="sim-label">Model 2</span></div>
+      <div class="sim-arrow" id="sa4"></div>
+      <div class="sim-node"><div class="sim-icon" id="sn5" style="background:rgba(16,185,129,.1)">📐</div><span class="sim-label">Formula</span></div>
+      <div class="sim-arrow" id="sa5"></div>
+      <div class="sim-node"><div class="sim-icon" id="sn6">🌐</div><span class="sim-label">Skill Graph</span></div>
+      <div class="sim-arrow" id="sa6"></div>
+      <div class="sim-node"><div class="sim-icon" id="sn7">📊</div><span class="sim-label">Dashboard</span></div>
+    </div>
+
+    <button class="simulate-btn" id="sim-btn" onclick="runSimulation()">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+      Start Simulation
+    </button>
+
+    <div class="sim-log" id="sim-log" style="display:none"></div>
+
+    <div id="sim-result" style="display:none;margin-top:2rem;padding:1.5rem;background:var(--card);border:1px solid var(--green);border-radius:16px;max-width:560px;margin-left:auto;margin-right:auto;text-align:left">
+      <div style="font-size:.8rem;color:var(--green);font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:1rem">Pipeline Complete — 21ms</div>
+      <div id="sim-result-content"></div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <p><strong>Adaptive Learning Intelligence Engine</strong> — Hackathon Grade</p>
+  <p style="margin-top:.4rem">Exactly 2 ML models &nbsp;·&nbsp; Everything else formula-based &nbsp;·&nbsp; All outputs JSON &nbsp;·&nbsp; Child-safe &nbsp;·&nbsp; Parent-friendly</p>
+</footer>
+
+<!-- ══════════════════════════════ SCRIPTS ══════════════════════════════ -->
+<script>
+// ─── PROGRESS BAR ─────────────────────────────────────────────
+window.addEventListener('scroll', () => {
+  const el  = document.getElementById('progress-bar');
+  const pct = window.scrollY / (document.body.scrollHeight - window.innerHeight) * 100;
+  el.style.width = pct + '%';
+});
+
+// ─── HERO CANVAS PARTICLES ────────────────────────────────────
+(function() {
+  const canvas = document.getElementById('hero-canvas');
+  const ctx    = canvas.getContext('2d');
+  let W, H, particles = [], lines = [];
+
+  function resize() { W = canvas.width = canvas.offsetWidth; H = canvas.height = canvas.offsetHeight; }
+  resize(); window.addEventListener('resize', resize);
+
+  const COLORS = ['#6366f1','#3b82f6','#8b5cf6','#ec4899','#06b6d4'];
+
+  class Particle {
+    constructor() { this.reset(); }
+    reset() {
+      this.x    = Math.random() * W;
+      this.y    = Math.random() * H;
+      this.vx   = (Math.random() - .5) * .5;
+      this.vy   = (Math.random() - .5) * .5;
+      this.r    = Math.random() * 2 + 1;
+      this.col  = COLORS[Math.floor(Math.random() * COLORS.length)];
+      this.life = Math.random();
+    }
+    update() {
+      this.x += this.vx; this.y += this.vy;
+      if (this.x < 0 || this.x > W || this.y < 0 || this.y > H) this.reset();
+    }
+    draw() {
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
+      ctx.fillStyle = this.col + '99';
+      ctx.fill();
+    }
+  }
+
+  for (let i = 0; i < 80; i++) particles.push(new Particle());
+
+  function drawLines() {
+    for (let i = 0; i < particles.length; i++) {
+      for (let j = i + 1; j < particles.length; j++) {
+        const dx = particles[i].x - particles[j].x;
+        const dy = particles[i].y - particles[j].y;
+        const d  = Math.sqrt(dx*dx + dy*dy);
+        if (d < 120) {
+          ctx.beginPath();
+          ctx.moveTo(particles[i].x, particles[i].y);
+          ctx.lineTo(particles[j].x, particles[j].y);
+          ctx.strokeStyle = `rgba(99,102,241,${(1 - d/120) * .25})`;
+          ctx.lineWidth   = .5;
+          ctx.stroke();
+        }
+      }
+    }
+  }
+
+  function animate() {
+    ctx.clearRect(0, 0, W, H);
+    particles.forEach(p => { p.update(); p.draw(); });
+    drawLines();
+    requestAnimationFrame(animate);
+  }
+  animate();
+})();
+
+// ─── SCROLL ANIMATIONS ────────────────────────────────────────
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.classList.add('visible');
+      // trigger timeline items inside
+      e.target.querySelectorAll('.timeline-item').forEach((t,i) => {
+        setTimeout(() => t.classList.add('visible'), i * 200);
+      });
+    }
+  });
+}, { threshold: 0.15 });
+
+document.querySelectorAll('.step-card, .output-card').forEach(el => observer.observe(el));
+
+// Trigger onboarding form on scroll
+const obForm = new IntersectionObserver(entries => {
+  if (entries[0].isIntersecting) {
+    document.querySelectorAll('.form-field').forEach(f => {
+      f.style.opacity = '1';
+      f.style.transform = 'translateY(0)';
+    });
+    document.querySelectorAll('#onboard-timeline .timeline-item').forEach((t,i) => {
+      setTimeout(() => t.classList.add('visible'), 300 + i * 250);
+    });
+    animateFeatureTables();
+    obForm.disconnect();
+  }
+}, { threshold: .2 });
+obForm.observe(document.getElementById('onboard-form'));
+
+// Start event log on scroll
+const obEvents = new IntersectionObserver(entries => {
+  if (entries[0].isIntersecting) { startEventLog(); obEvents.disconnect(); }
+}, { threshold: .3 });
+obEvents.observe(document.getElementById('event-log'));
+
+// ─── EVENT LOG SIMULATION ─────────────────────────────────────
+const EVENT_DATA = [
+  { skill:'counting',       correct:true,  rt:'1240ms',  color:'ev-green' },
+  { skill:'phonics',        correct:false, rt:'3800ms',  color:'ev-red'   },
+  { skill:'color_sorting',  correct:true,  rt:'980ms',   color:'ev-green' },
+  { skill:'counting',       correct:true,  rt:'1100ms',  color:'ev-green' },
+  { skill:'letter_recog',   correct:true,  rt:'2200ms',  color:'ev-green' },
+  { skill:'phonics',        correct:false, rt:'4100ms',  color:'ev-red'   },
+  { skill:'shape_recog',    correct:true,  rt:'1350ms',  color:'ev-green' },
+  { skill:'color_sorting',  correct:true,  rt:'880ms',   color:'ev-green' },
+  { skill:'counting',       correct:true,  rt:'950ms',   color:'ev-green' },
+  { skill:'phonics',        correct:true,  rt:'2600ms',  color:'ev-amber' },
+  { skill:'number_order',   correct:false, rt:'5200ms',  color:'ev-red'   },
+  { skill:'memory_recall',  correct:true,  rt:'2800ms',  color:'ev-green' },
+];
+
+function startEventLog() {
+  const log = document.getElementById('event-log');
+  let i = 0;
+  function addEvent() {
+    const e   = EVENT_DATA[i % EVENT_DATA.length];
+    const row = document.createElement('div');
+    row.className = 'event-row';
+    row.innerHTML = `
+      <div class="event-dot ${e.color}"></div>
+      <span style="color:var(--cyan);min-width:130px">${e.skill}</span>
+      <span style="${e.correct ? 'color:var(--green)' : 'color:var(--red)'}">${e.correct ? '✓ correct' : '✗ wrong'}</span>
+      <span style="color:var(--muted);margin-left:auto">${e.rt}</span>
+    `;
+    log.appendChild(row);
+    if (log.children.length > 5) log.removeChild(log.firstChild);
+    i++;
+    setTimeout(addEvent, 900 + Math.random() * 500);
+  }
+  addEvent();
+}
+
+// ─── FEATURE TABLE ANIMATION ──────────────────────────────────
+function animateFeatureTables() {
+  const skillVals = ['0.71','0.65','-8.2ms','0.28','4','1','0.82','0.35'];
+  const engVals   = ['+14.5','0.34','4200ms','0.31','0.58','0.62','3','2.1/min'];
+  const sfIds     = ['sf1','sf2','sf3','sf4','sf5','sf6','sf7','sf8'];
+  const efIds     = ['ef1','ef2','ef3','ef4','ef5','ef6','ef7','ef8'];
+
+  sfIds.forEach((id, i) => setTimeout(() => {
+    const el = document.getElementById(id);
+    if (el) { el.textContent = skillVals[i]; el.style.color = 'var(--green)'; }
+  }, i * 120));
+
+  efIds.forEach((id, i) => setTimeout(() => {
+    const el = document.getElementById(id);
+    if (el) { el.textContent = engVals[i]; el.style.color = 'var(--amber)'; }
+  }, i * 120));
+}
+
+// ─── SKILL BARS ───────────────────────────────────────────────
+const SKILLS = [
+  { name:'Phonics & Sounds',        prob:.31, class:'low'       },
+  { name:'Letter Recognition',      prob:.48, class:'developing'},
+  { name:'Counting',                prob:.62, class:'developing'},
+  { name:'Number Order',            prob:.28, class:'low'       },
+  { name:'Shape Recognition',       prob:.67, class:'developing'},
+  { name:'Color Sorting',           prob:.72, class:'high'      },
+  { name:'Hand-Eye Coordination',   prob:.45, class:'developing'},
+  { name:'Focus & Attention',       prob:.38, class:'low'       },
+  { name:'Memory',                  prob:.30, class:'low'       },
+  { name:'Social Awareness',        prob:.50, class:'developing'},
+  { name:'Emotional Understanding', prob:.38, class:'low'       },
+];
+
+function buildSkillBars() {
+  const grid = document.getElementById('skill-bars');
+  grid.innerHTML = '';
+  SKILLS.forEach((s, i) => {
+    const barClass  = s.class === 'high' ? 'bar-high' : s.class === 'developing' ? 'bar-developing' : 'bar-low';
+    const badgeClass= `badge-${s.class}`;
+    const colorMap  = {low:'var(--red)', developing:'var(--amber)', high:'var(--green)'};
+
+    const row = document.createElement('div');
+    row.className = 'skill-row';
+    row.innerHTML = `
+      <span class="skill-name">${s.name}</span>
+      <div class="skill-bar-bg">
+        <div class="skill-bar-fill ${barClass}" id="sbar-${i}" style="width:0%"></div>
+      </div>
+      <div style="text-align:right">
+        <div class="skill-prob" id="sprob-${i}" style="color:${colorMap[s.class]}">0.00</div>
+        <span class="mastery-badge ${badgeClass}">${s.class}</span>
+      </div>
+    `;
+    grid.appendChild(row);
+  });
+}
+
+function animateSkillBars() {
+  SKILLS.forEach((s, i) => {
+    const bar  = document.getElementById(`sbar-${i}`);
+    const prob = document.getElementById(`sprob-${i}`);
+    if (!bar || !prob) return;
+    bar.style.width = '0%';
+    prob.textContent = '0.00';
+
+    setTimeout(() => {
+      bar.style.width = (s.prob * 100) + '%';
+      // Count up number
+      let start = 0; const end = s.prob; const dur = 1200;
+      const t0 = performance.now();
+      function tick(now) {
+        const p = Math.min((now - t0) / dur, 1);
+        const ease = 1 - Math.pow(1 - p, 3);
+        prob.textContent = (start + (end - start) * ease).toFixed(2);
+        if (p < 1) requestAnimationFrame(tick);
+        else prob.textContent = end.toFixed(2);
+      }
+      requestAnimationFrame(tick);
+    }, i * 90);
+  });
+}
+
+// Trigger skill bars when section visible
+const obSkill = new IntersectionObserver(entries => {
+  if (entries[0].isIntersecting) { buildSkillBars(); setTimeout(animateSkillBars, 300); obSkill.disconnect(); }
+}, { threshold: .2 });
+const skillCard = document.getElementById('skill-mastery-card');
+if (skillCard) obSkill.observe(skillCard);
+
+// ─── ENGAGEMENT GAUGE ─────────────────────────────────────────
+const ENG_STATES = [
+  { state:'Engaged',  fat:.04, neu:.09, eng:.87, color:'#10b981', gaugePct:.90 },
+  { state:'Neutral',  fat:.28, neu:.61, eng:.11, color:'#f59e0b', gaugePct:.50 },
+  { state:'Fatigued', fat:.91, neu:.07, eng:.02, color:'#ef4444', gaugePct:.08 },
+];
+let engIdx = 1;  // start at neutral
+
+function drawGauge(pct, color) {
+  const canvas = document.getElementById('gauge-canvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const W   = canvas.width, H = canvas.height;
+  ctx.clearRect(0, 0, W, H);
+
+  const cx = W / 2, cy = H * .88, r = W * .42;
+  const startA = Math.PI, endA = 2 * Math.PI;
+
+  // Background arc
+  ctx.beginPath();
+  ctx.arc(cx, cy, r, startA, endA);
+  ctx.strokeStyle = '#1e2d4a';
+  ctx.lineWidth   = 14;
+  ctx.lineCap     = 'round';
+  ctx.stroke();
+
+  // Gradient filled arc
+  const grad = ctx.createLinearGradient(cx - r, cy, cx + r, cy);
+  grad.addColorStop(0, '#ef4444');
+  grad.addColorStop(.5, '#f59e0b');
+  grad.addColorStop(1, '#10b981');
+
+  ctx.beginPath();
+  ctx.arc(cx, cy, r, startA, startA + pct * Math.PI);
+  ctx.strokeStyle = grad;
+  ctx.lineWidth   = 14;
+  ctx.lineCap     = 'round';
+  ctx.stroke();
+
+  // Needle
+  const angle = Math.PI + pct * Math.PI;
+  const nx = cx + r * .75 * Math.cos(angle);
+  const ny = cy + r * .75 * Math.sin(angle);
+  ctx.beginPath();
+  ctx.moveTo(cx, cy);
+  ctx.lineTo(nx, ny);
+  ctx.strokeStyle = '#fff';
+  ctx.lineWidth   = 2.5;
+  ctx.lineCap     = 'round';
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.arc(cx, cy, 6, 0, Math.PI * 2);
+  ctx.fillStyle = '#fff';
+  ctx.fill();
+
+  // Labels
+  ctx.fillStyle = '#64748b';
+  ctx.font      = 'bold 10px Inter, sans-serif';
+  ctx.textAlign = 'left';
+  ctx.fillText('Tired', cx - r * 1.05, cy + 4);
+  ctx.textAlign = 'right';
+  ctx.fillText('Focused', cx + r * 1.05, cy + 4);
+}
+
+function setEngagement(idx) {
+  const s = ENG_STATES[idx];
+  document.getElementById('gauge-state-text').textContent  = s.state;
+  document.getElementById('gauge-state-text').style.color  = s.color;
+  document.getElementById('gauge-sub-text').textContent    = `fatigue risk: ${s.fat.toFixed(2)}`;
+
+  document.getElementById('bar-fat').style.width = (s.fat * 100) + '%';
+  document.getElementById('bar-neu').style.width = (s.neu * 100) + '%';
+  document.getElementById('bar-eng').style.width = (s.eng * 100) + '%';
+  document.getElementById('prob-fat').textContent = s.fat.toFixed(2);
+  document.getElementById('prob-neu').textContent = s.neu.toFixed(2);
+  document.getElementById('prob-eng').textContent = s.eng.toFixed(2);
+
+  const badge = document.getElementById('alert-badge');
+  badge.style.display = 'block';
+  if (s.fat >= .80) {
+    badge.textContent = '🔴 HARD STOP — End session now';
+    badge.style.background = 'rgba(239,68,68,.15)';
+    badge.style.border = '1px solid rgba(239,68,68,.3)';
+    badge.style.color = 'var(--red)';
+  } else if (s.fat >= .60) {
+    badge.textContent = '🟡 SOFT ALERT — Shorten tasks';
+    badge.style.background = 'rgba(245,158,11,.15)';
+    badge.style.border = '1px solid rgba(245,158,11,.3)';
+    badge.style.color = 'var(--amber)';
+  } else {
+    badge.textContent = '🟢 Continue — Engagement good';
+    badge.style.background = 'rgba(16,185,129,.15)';
+    badge.style.border = '1px solid rgba(16,185,129,.3)';
+    badge.style.color = 'var(--green)';
+  }
+
+  // Animate gauge
+  let current = 0.5;
+  const target = s.gaugePct;
+  const step = () => {
+    current += (target - current) * .1;
+    drawGauge(current, s.color);
+    if (Math.abs(current - target) > .001) requestAnimationFrame(step);
+  };
+  step();
+}
+
+function animateEngagement() {
+  engIdx = (engIdx + 1) % ENG_STATES.length;
+  setEngagement(engIdx);
+}
+
+const obEng = new IntersectionObserver(entries => {
+  if (entries[0].isIntersecting) { setTimeout(() => setEngagement(1), 400); obEng.disconnect(); }
+}, { threshold: .3 });
+const engCanvas = document.getElementById('gauge-canvas');
+if (engCanvas) obEng.observe(engCanvas);
+
+// ─── FORMULA ENGINE ───────────────────────────────────────────
+const FORMULAS = [
+  { cond:'mastery_prob < 0.40',       action:'Reduce difficulty by 1', why:'Child is in struggle zone — make it easier to rebuild confidence' },
+  { cond:'mastery_prob 0.40–0.70',    action:'Maintain current difficulty', why:'Zone of Proximal Development — ideal learning zone, no change needed' },
+  { cond:'mastery_prob >= 0.70',      action:'Increase difficulty by 1', why:'Child has mastered this level — push to the next challenge' },
+  { cond:'confidence < 0.55',         action:'Hold difficulty steady', why:'Model is uncertain — do not make changes based on low-confidence prediction' },
+  { cond:'fatigue_risk >= 0.80',      action:'END SESSION — victory moment', why:'Hard stop: child is too tired. Force ending prevents negative associations' },
+  { cond:'fatigue_risk >= 0.60',      action:'Switch to kinesthetic mode', why:'Movement re-engages children who are mentally tiring. Switch before full fatigue.' },
+  { cond:'3+ consecutive errors',     action:'Hint intensity = HIGH', why:'Error burst signals comprehension gap — step-by-step guidance needed immediately' },
+  { cond:'streak >= 5',               action:'Reward = celebration 🎉', why:'Sustained success deserves amplified positive reinforcement' },
+  { cond:'mastery crossed 0.70',      action:'Reward = progress badge', why:'Milestone achievement — parent-facing badge reinforces long-term motivation' },
+  { cond:'best modality > 0.80 rate', action:'Prioritise that modality', why:'Child excels in this input channel — route tasks through their strength' },
+  { cond:'session_ratio >= 0.85',     action:'Trigger victory moment', why:'Near session time limit — end on a positive note before fatigue sets in' },
+  { cond:'regression detected',       action:'reinforcement_need = URGENT', why:'Skill declining after previous mastery — flag for intensive support' },
+];
+
+function buildFormulaCards() {
+  const grid = document.getElementById('formula-grid');
+  FORMULAS.forEach((f, i) => {
+    const card = document.createElement('div');
+    card.className = 'formula-card';
+    card.id = `fc-${i}`;
+    card.innerHTML = `
+      <span class="formula-condition">${f.cond}</span>
+      <div class="formula-action">→ ${f.action}</div>
+      <div class="formula-why">${f.why}</div>
+    `;
+    grid.appendChild(card);
+  });
+}
+
+function animateFormulas() {
+  FORMULAS.forEach((_, i) => {
+    const el = document.getElementById(`fc-${i}`);
+    if (el) {
+      setTimeout(() => { el.classList.add('lit'); }, i * 100);
+      setTimeout(() => { el.classList.add('active-rule'); }, i * 100 + 50);
+      setTimeout(() => { el.classList.remove('active-rule'); }, i * 100 + 800);
+    }
+  });
+}
+
+const obFormula = new IntersectionObserver(entries => {
+  if (entries[0].isIntersecting) {
+    FORMULAS.forEach((_, i) => {
+      setTimeout(() => document.getElementById(`fc-${i}`)?.classList.add('lit'), i * 80);
+    });
+    obFormula.disconnect();
+  }
+}, { threshold: .1 });
+
+function initFormula() {
+  buildFormulaCards();
+  obFormula.observe(document.getElementById('formula-grid'));
+}
+
+// ─── DECISION CHAIN ───────────────────────────────────────────
+const CHAIN_STEPS = [
+  { type:'check',  text:'READ Model 1 → phonics: mastery_prob = 0.31 (confidence = 0.72)',  delay:0   },
+  { type:'check',  text:'READ Model 2 → engagement_state = "neutral", fatigue_risk = 0.28', delay:500 },
+  { type:'rule',   text:'fatigue_risk 0.28 < 0.80 → session continues',                      delay:1000},
+  { type:'rule',   text:'fatigue_risk 0.28 < 0.60 → no modality switch',                     delay:1400},
+  { type:'decide', text:'next_skill = phonics  (lowest mastery, unlocked)',                   delay:1900},
+  { type:'rule',   text:'mastery_prob 0.31 < 0.40 → reduce difficulty',                       delay:2400},
+  { type:'rule',   text:'age_band = preschool → difficulty clamped at min=2',                 delay:2800},
+  { type:'decide', text:'next_difficulty = 2 (easy)',                                          delay:3200},
+  { type:'rule',   text:'preferred_modality = auditory + no fatigue → use auditory',          delay:3700},
+  { type:'decide', text:'next_modality = auditory',                                            delay:4100},
+  { type:'rule',   text:'mastery 0.31 in [0.30, 0.50) → hint_intensity = medium',            delay:4500},
+  { type:'rule',   text:'streak = 2, no milestone → reward = sparkle',                        delay:4900},
+  { type:'out',    text:'OUTPUT → { skill:phonics, difficulty:easy, modality:auditory, hint:medium, reward:sparkle }', delay:5400},
+];
+
+function runDecisionChain() {
+  const container = document.getElementById('decision-chain');
+  container.innerHTML = '';
+  const colorMap = { check:'var(--blue)', rule:'var(--green)', decide:'var(--amber)', out:'var(--pink)' };
+  const iconMap  = { check:'◎', rule:'▷', decide:'★', out:'✓' };
+
+  CHAIN_STEPS.forEach(step => {
+    setTimeout(() => {
+      const div = document.createElement('div');
+      div.style.cssText = `display:flex;align-items:flex-start;gap:.6rem;padding:.3rem 0;animation:slideInLeft .3s ease`;
+      div.innerHTML = `
+        <span style="color:${colorMap[step.type]};flex-shrink:0">${iconMap[step.type]}</span>
+        <span style="color:${step.type==='out' ? colorMap.out : 'var(--text)'}">${step.text}</span>
+      `;
+      container.appendChild(div);
+      container.scrollTop = container.scrollHeight;
+    }, step.delay);
+  });
+}
+
+// ─── OUTPUT CARDS ─────────────────────────────────────────────
+const OUTPUTS = [
+  {
+    title: 'Starter Profile', icon: '👤',
+    headerBg: 'rgba(236,72,153,.08)', headerBorder: 'rgba(236,72,153,.2)',
+    badge: 'Onboarding', badgeBg: 'rgba(236,72,153,.15)', badgeColor: '#ec4899',
+    json: `<span class="j-punc">{</span>
+  <span class="j-key">"child_id"</span><span class="j-punc">: </span><span class="j-str">"a1b2c3d4..."</span><span class="j-punc">,</span>
+  <span class="j-key">"name"</span><span class="j-punc">: </span><span class="j-str">"Aarav"</span><span class="j-punc">,</span>
+  <span class="j-key">"age_band"</span><span class="j-punc">: </span><span class="j-str">"preschool"</span><span class="j-punc">,</span>
+  <span class="j-key">"preferred_modality"</span><span class="j-punc">: </span><span class="j-str">"auditory"</span><span class="j-punc">,</span>
+  <span class="j-key">"allowed_session_minutes"</span><span class="j-punc">: </span><span class="j-num">15</span><span class="j-punc">,</span>
+  <span class="j-key">"flags"</span><span class="j-punc">: {</span>
+    <span class="j-key">"new_user"</span><span class="j-punc">: </span><span class="j-bool">true</span><span class="j-punc">,</span>
+    <span class="j-key">"cold_start"</span><span class="j-punc">: </span><span class="j-bool">true</span>
+  <span class="j-punc">}</span>
+<span class="j-punc">}</span>`,
+  },
+  {
+    title: 'Skill Graph', icon: '🌐',
+    headerBg: 'rgba(99,102,241,.08)', headerBorder: 'rgba(99,102,241,.2)',
+    badge: 'ML Model 1', badgeBg: 'rgba(99,102,241,.15)', badgeColor: '#6366f1',
+    json: `<span class="j-punc">{</span>
+  <span class="j-key">"skill_nodes"</span><span class="j-punc">: [</span>
+    <span class="j-punc">{</span>
+      <span class="j-key">"skill_name"</span><span class="j-punc">: </span><span class="j-str">"counting"</span><span class="j-punc">,</span>
+      <span class="j-key">"mastery_prob"</span><span class="j-punc">: </span><span class="j-num">0.62</span><span class="j-punc">,</span>
+      <span class="j-key">"mastery_class"</span><span class="j-punc">: </span><span class="j-str">"developing"</span><span class="j-punc">,</span>
+      <span class="j-key">"trend"</span><span class="j-punc">: </span><span class="j-str">"improving"</span><span class="j-punc">,</span>
+      <span class="j-key">"confidence"</span><span class="j-punc">: </span><span class="j-num">0.83</span>
+    <span class="j-punc">}</span>
+  <span class="j-punc">],</span>
+  <span class="j-key">"overall_progress_pct"</span><span class="j-punc">: </span><span class="j-num">46.3</span>
+<span class="j-punc">}</span>`,
+  },
+  {
+    title: 'Engagement State', icon: '⚡',
+    headerBg: 'rgba(245,158,11,.08)', headerBorder: 'rgba(245,158,11,.2)',
+    badge: 'ML Model 2', badgeBg: 'rgba(245,158,11,.15)', badgeColor: '#f59e0b',
+    json: `<span class="j-punc">{</span>
+  <span class="j-key">"engagement_state"</span><span class="j-punc">: </span><span class="j-str">"neutral"</span><span class="j-punc">,</span>
+  <span class="j-key">"fatigue_risk"</span><span class="j-punc">: </span><span class="j-num">0.28</span><span class="j-punc">,</span>
+  <span class="j-key">"attention_level"</span><span class="j-punc">: </span><span class="j-num">0.55</span><span class="j-punc">,</span>
+  <span class="j-key">"confidence"</span><span class="j-punc">: </span><span class="j-num">0.71</span><span class="j-punc">,</span>
+  <span class="j-key">"alert_level"</span><span class="j-punc">: </span><span class="j-str">"none"</span><span class="j-punc">,</span>
+  <span class="j-key">"probabilities"</span><span class="j-punc">: {</span>
+    <span class="j-key">"fatigued"</span><span class="j-punc">: </span><span class="j-num">0.28</span><span class="j-punc">,</span>
+    <span class="j-key">"neutral"</span><span class="j-punc">: </span><span class="j-num">0.71</span><span class="j-punc">,</span>
+    <span class="j-key">"engaged"</span><span class="j-punc">: </span><span class="j-num">0.01</span>
+  <span class="j-punc">}</span>
+<span class="j-punc">}</span>`,
+  },
+  {
+    title: 'Next Activity', icon: '🎯',
+    headerBg: 'rgba(16,185,129,.08)', headerBorder: 'rgba(16,185,129,.2)',
+    badge: 'Formula Engine', badgeBg: 'rgba(16,185,129,.15)', badgeColor: '#10b981',
+    json: `<span class="j-punc">{</span>
+  <span class="j-key">"next_skill_focus"</span><span class="j-punc">: </span><span class="j-str">"phonics"</span><span class="j-punc">,</span>
+  <span class="j-key">"next_difficulty_label"</span><span class="j-punc">: </span><span class="j-str">"easy"</span><span class="j-punc">,</span>
+  <span class="j-key">"next_modality"</span><span class="j-punc">: </span><span class="j-str">"auditory"</span><span class="j-punc">,</span>
+  <span class="j-key">"hint_intensity"</span><span class="j-punc">: </span><span class="j-str">"medium"</span><span class="j-punc">,</span>
+  <span class="j-key">"reward_type"</span><span class="j-punc">: </span><span class="j-str">"sparkle"</span><span class="j-punc">,</span>
+  <span class="j-key">"reason"</span><span class="j-punc">: </span><span class="j-str">"phonics: low mastery (31%); auditory preferred"</span>
+<span class="j-punc">}</span>`,
+  },
+  {
+    title: 'Parent Summary', icon: '💬',
+    headerBg: 'rgba(139,92,246,.08)', headerBorder: 'rgba(139,92,246,.2)',
+    badge: 'Rule-Based Text', badgeBg: 'rgba(139,92,246,.15)', badgeColor: '#8b5cf6',
+    json: `<span class="j-punc">{</span>
+  <span class="j-key">"human_summary"</span><span class="j-punc">: </span>
+    <span class="j-str">"Aarav had a great session. Color Sorting is strong. Phonics needs more practice."</span><span class="j-punc">,</span>
+  <span class="j-key">"recommended_offline_activity"</span><span class="j-punc">: </span>
+    <span class="j-str">"Point out letters on cereal boxes."</span><span class="j-punc">,</span>
+  <span class="j-key">"best_learning_style"</span><span class="j-punc">: {</span>
+    <span class="j-key">"modality"</span><span class="j-punc">: </span><span class="j-str">"auditory"</span><span class="j-punc">,</span>
+    <span class="j-key">"note"</span><span class="j-punc">: </span><span class="j-str">"Songs and rhymes work brilliantly."</span>
+  <span class="j-punc">}</span>
+<span class="j-punc">}</span>`,
+  },
+  {
+    title: 'Session Summary', icon: '📋',
+    headerBg: 'rgba(6,182,212,.08)', headerBorder: 'rgba(6,182,212,.2)',
+    badge: 'Rule-Based', badgeBg: 'rgba(6,182,212,.15)', badgeColor: '#06b6d4',
+    json: `<span class="j-punc">{</span>
+  <span class="j-key">"duration_minutes"</span><span class="j-punc">: </span><span class="j-num">12.0</span><span class="j-punc">,</span>
+  <span class="j-key">"tasks_completed"</span><span class="j-punc">: </span><span class="j-num">25</span><span class="j-punc">,</span>
+  <span class="j-key">"overall_accuracy"</span><span class="j-punc">: </span><span class="j-num">0.72</span><span class="j-punc">,</span>
+  <span class="j-key">"skills_improved"</span><span class="j-punc">: [</span>
+    <span class="j-str">"counting"</span><span class="j-punc">, </span><span class="j-str">"color_sorting"</span>
+  <span class="j-punc">],</span>
+  <span class="j-key">"recommended_next_session"</span><span class="j-punc">: </span>
+    <span class="j-str">"later_today_or_tomorrow"</span>
+<span class="j-punc">}</span>`,
+  },
+];
+
+function buildOutputCards() {
+  const grid = document.getElementById('output-grid');
+  OUTPUTS.forEach((o, i) => {
+    const card = document.createElement('div');
+    card.className = 'output-card';
+    card.style.transitionDelay = (i * 100) + 'ms';
+    card.innerHTML = `
+      <div class="output-header" style="background:${o.headerBg};border-color:${o.headerBorder}">
+        <span class="output-header-icon">${o.icon}</span>
+        <span class="output-header-title">${o.title}</span>
+        <span class="output-header-badge" style="background:${o.badgeBg};color:${o.badgeColor}">${o.badge}</span>
+      </div>
+      <div class="json-viewer">${o.json}</div>
+    `;
+    grid.appendChild(card);
+    setTimeout(() => observer.observe(card), 100);
+  });
+}
+
+// ─── FULL SIMULATION ──────────────────────────────────────────
+const SIM_STEPS = [
+  { node:0, msg:'[ONBOARD]  Loading child profile: Aarav, age=5.5y', color:'log-ok'  },
+  { node:1, msg:'[EVENTS]   Receiving gameplay events... 25 events collected', color:'log-fmt' },
+  { node:2, msg:'[FEATURES] Computing 30+ features from event window', color:'log-fmt' },
+  { node:3, msg:'[MODEL-1]  Running SkillMasteryClassifier (11 XGBoost models)...', color:'log-ml' },
+  { node:3, msg:'[MODEL-1]  phonics=0.31 | counting=0.62 | color_sort=0.72', color:'log-ml' },
+  { node:4, msg:'[MODEL-2]  Running EngagementClassifier (3-class XGBoost)...', color:'log-ml' },
+  { node:4, msg:'[MODEL-2]  state=neutral | fatigue_risk=0.28 | confidence=0.71', color:'log-ml' },
+  { node:5, msg:'[FORMULA]  Applying decision rules...', color:'log-fmt' },
+  { node:5, msg:'[FORMULA]  next=phonics | diff=easy | modal=auditory | hints=medium', color:'log-fmt' },
+  { node:6, msg:'[GRAPH]    Updating skill graph with EMA smoothing (α=0.70)', color:'log-ok'  },
+  { node:7, msg:'[DASH]     Generating parent summary in plain English', color:'log-out' },
+  { node:7, msg:'[DONE]     Pipeline complete in 20.9ms', color:'log-ok'  },
+];
+
+let simRunning = false;
+
+function runSimulation() {
+  if (simRunning) return;
+  simRunning = true;
+  const btn = document.getElementById('sim-btn');
+  const log = document.getElementById('sim-log');
+  const result = document.getElementById('sim-result');
+  btn.innerHTML = '<span class="spinning">⟳</span> Running...';
+  btn.disabled = true;
+  log.style.display = 'block';
+  log.innerHTML = '';
+  result.style.display = 'none';
+
+  // Reset nodes
+  for (let i = 0; i <= 7; i++) {
+    const n = document.getElementById(`sn${i}`);
+    if (n) { n.className = 'sim-icon'; n.style.background = ''; }
+  }
+
+  let delay = 0;
+  SIM_STEPS.forEach((step, idx) => {
+    delay += idx === 0 ? 100 : 500;
+    const d = delay;
+
+    setTimeout(() => {
+      // Activate node
+      const node = document.getElementById(`sn${step.node}`);
+      if (node) {
+        node.classList.add('processing');
+        // After half step, mark done
+        setTimeout(() => {
+          node.classList.remove('processing');
+          node.classList.add('done');
+          node.textContent = ['👨‍👩‍👧','🎮','⚙️','🧠','⚡','📐','🌐','📊'][step.node];
+          // Activate arrow
+          const arrow = document.getElementById(`sa${step.node}`);
+          if (arrow) arrow.classList.add('active');
+        }, 350);
+      }
+
+      // Add log line
+      const line = document.createElement('div');
+      line.className = `sim-log-entry`;
+      const ts = new Date().toLocaleTimeString('en-US', {hour12:false, hour:'2-digit',minute:'2-digit',second:'2-digit'});
+      line.innerHTML = `<span class="log-ts">[${ts}] </span><span class="${step.color}">${step.msg}</span>`;
+      log.appendChild(line);
+      log.scrollTop = log.scrollHeight;
+
+      // Final step
+      if (idx === SIM_STEPS.length - 1) {
+        setTimeout(() => {
+          result.style.display = 'block';
+          document.getElementById('sim-result-content').innerHTML = `
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;font-size:.82rem">
+              <div><span style="color:var(--muted)">Next Skill</span><div style="font-weight:700;color:var(--indigo);font-size:1rem;margin-top:.2rem">Phonics & Sounds</div></div>
+              <div><span style="color:var(--muted)">Difficulty</span><div style="font-weight:700;color:var(--amber);font-size:1rem;margin-top:.2rem">Easy (Level 2)</div></div>
+              <div><span style="color:var(--muted)">Modality</span><div style="font-weight:700;color:var(--cyan);font-size:1rem;margin-top:.2rem">Auditory</div></div>
+              <div><span style="color:var(--muted)">Engagement</span><div style="font-weight:700;color:var(--amber);font-size:1rem;margin-top:.2rem">Neutral (28% fatigue)</div></div>
+              <div style="grid-column:1/-1"><span style="color:var(--muted)">Parent Tip</span><div style="font-weight:500;color:var(--text);margin-top:.2rem;line-height:1.5">"Short, playful practice moments work best — even 5 minutes helps."</div></div>
+            </div>
+          `;
+          btn.innerHTML = `<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg> Run Again`;
+          btn.disabled = false;
+          simRunning = false;
+        }, 600);
+      }
+    }, d);
+  });
+}
+
+// ─── INIT ALL ─────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  initFormula();
+  buildOutputCards();
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,46 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "SessionSummary",
+  "description": "End-of-session summary for parent dashboard and next session planning.",
+  "type": "object",
+  "required": [
+    "child_id", "session_id", "generated_at", "duration_minutes",
+    "tasks_completed", "overall_accuracy", "skills_practiced",
+    "skills_improved", "skills_improved_display",
+    "skills_needing_support", "skills_needing_support_display",
+    "engagement_notes", "recommended_next_session_time", "summary_for_parent"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "child_id":     { "type": "string" },
+    "session_id":   { "type": "string" },
+    "generated_at": { "type": "string", "format": "date-time" },
+    "duration_minutes":  { "type": "number" },
+    "tasks_completed":   { "type": "integer", "minimum": 0 },
+    "overall_accuracy":  { "type": "number", "minimum": 0, "maximum": 1 },
+    "skills_practiced":  { "type": "array", "items": { "type": "string" } },
+    "skills_improved":   { "type": "array", "items": { "type": "string" } },
+    "skills_improved_display": { "type": "array", "items": { "type": "string" } },
+    "skills_needing_support": { "type": "array", "items": { "type": "string" } },
+    "skills_needing_support_display": { "type": "array", "items": { "type": "string" } },
+    "engagement_notes": {
+      "type": "object",
+      "required": ["state", "fatigue_risk", "duration_min", "note"],
+      "properties": {
+        "state":        { "type": "string" },
+        "fatigue_risk": { "type": "number" },
+        "duration_min": { "type": "number" },
+        "note":         { "type": "string" }
+      }
+    },
+    "recommended_next_session_time": {
+      "type": "string",
+      "enum": ["today_or_tomorrow", "later_today_or_tomorrow", "tomorrow_or_later"],
+      "description": "Rule-based recommendation from engagement state"
+    },
+    "summary_for_parent": {
+      "type": "string",
+      "description": "2-3 plain English sentences for the parent. No ML jargon."
+    }
+  }
+}

@@ -6,6 +6,7 @@ import { ScienceSolarRoute } from './routes/ScienceSolarRoute';
 import { MatchLettersRoute } from './routes/MatchLettersRoute';
 import { GuessWordRoute } from './routes/GuessWordRoute';
 import { MathEquationRoute } from './routes/MathEquationRoute';
+import { ChildProfileProvider } from './store/ChildProfileContext';
 
 function NotFoundPage() {
   return (
@@ -45,15 +46,21 @@ function RootWrapper() {
 
 export default function App() {
   return (
-    <Routes>
-      {/* Root Route starts with the wrapper */}
-      <Route path="/" element={<RootWrapper />} />
-      
-      <Route path="/science-solar" element={<ScienceSolarRoute />} />
-      <Route path="/english-match-letters" element={<MatchLettersRoute />} />
-      <Route path="/english-guess-word" element={<GuessWordRoute />} />
-      <Route path="/math-equations" element={<MathEquationRoute />} />
-      <Route path="*" element={<NotFoundPage />} />
-    </Routes>
+    // ChildProfileProvider wraps the entire app so any route can access
+    // the ML-generated profile via useChildProfile().
+    // The profile is null until onboarding completes (or if the backend
+    // is unavailable) — all consumers must handle null gracefully.
+    <ChildProfileProvider>
+      <Routes>
+        {/* Root Route starts with the wrapper */}
+        <Route path="/" element={<RootWrapper />} />
+
+        <Route path="/science-solar" element={<ScienceSolarRoute />} />
+        <Route path="/english-match-letters" element={<MatchLettersRoute />} />
+        <Route path="/english-guess-word" element={<GuessWordRoute />} />
+        <Route path="/math-equations" element={<MathEquationRoute />} />
+        <Route path="*" element={<NotFoundPage />} />
+      </Routes>
+    </ChildProfileProvider>
   );
 }

@@ -1,0 +1,86 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "StarterChildProfile",
+  "description": "Complete child profile built from parent onboarding. Formula-based, no ML.",
+  "type": "object",
+  "required": [
+    "child_id", "name", "age_months", "age_band", "language",
+    "interests", "goals", "sensitivities", "sessions_completed",
+    "preferred_modality", "allowed_session_minutes",
+    "current_difficulty_per_skill", "skill_mastery_probs",
+    "unlocked_skills", "days_since_last_session", "flags",
+    "safe_difficulty_range", "initial_skill_estimates",
+    "recommended_first_session_plan", "created_at", "updated_at"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "child_id":                { "type": "string", "format": "uuid" },
+    "name":                    { "type": "string" },
+    "age_months":              { "type": "integer", "minimum": 24, "maximum": 132 },
+    "age_band":                { "type": "string", "enum": ["toddler", "preschool", "early_primary", "primary"] },
+    "language":                { "type": "string" },
+    "interests":               { "type": "array", "items": { "type": "string" } },
+    "goals":                   { "type": "array", "items": { "type": "string" } },
+    "sensitivities":           { "type": "array", "items": { "type": "string" } },
+    "sessions_completed":      { "type": "integer", "minimum": 0 },
+    "preferred_modality":      { "type": "string", "enum": ["visual", "auditory", "kinesthetic", "story", "mixed"] },
+    "allowed_session_minutes": { "type": "integer", "minimum": 5, "maximum": 60 },
+    "current_difficulty_per_skill": {
+      "type": "object",
+      "description": "Skill name → current difficulty level (1-5)"
+    },
+    "skill_mastery_probs": {
+      "type": "object",
+      "description": "Skill name → mastery probability [0,1]"
+    },
+    "unlocked_skills": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Skills whose prerequisites are satisfied"
+    },
+    "days_since_last_session": { "type": "integer", "minimum": 0 },
+    "flags": {
+      "type": "object",
+      "required": ["new_user", "needs_calibration", "cold_start"],
+      "properties": {
+        "new_user":          { "type": "boolean" },
+        "needs_calibration": { "type": "boolean" },
+        "cold_start":        { "type": "boolean" }
+      }
+    },
+    "safe_difficulty_range": {
+      "type": "object",
+      "required": ["min", "max", "min_label", "max_label"],
+      "properties": {
+        "min":       { "type": "integer" },
+        "max":       { "type": "integer" },
+        "min_label": { "type": "string" },
+        "max_label": { "type": "string" }
+      }
+    },
+    "initial_skill_estimates": {
+      "type": "object",
+      "description": "Per-skill: mastery_prob, mastery_class, source, confidence"
+    },
+    "recommended_first_session_plan": {
+      "type": "object",
+      "required": ["structure", "warm_up_skill", "main_skill", "cool_down_skill",
+                   "starting_difficulty", "preferred_modality", "session_minutes"],
+      "properties": {
+        "structure":            { "type": "array", "items": { "type": "string" } },
+        "warm_up_skill":        { "type": "string" },
+        "main_skill":           { "type": "string" },
+        "cool_down_skill":      { "type": "string" },
+        "starting_difficulty":  { "type": "integer" },
+        "preferred_modality":   { "type": "string" },
+        "session_minutes":      { "type": "integer" },
+        "tasks_per_skill":      { "type": "integer" },
+        "hint_mode":            { "type": "string" },
+        "reward_frequency":     { "type": "string" },
+        "note":                 { "type": "string" }
+      }
+    },
+    "created_at": { "type": "string", "format": "date-time" },
+    "updated_at": { "type": "string", "format": "date-time" }
+  }
+}

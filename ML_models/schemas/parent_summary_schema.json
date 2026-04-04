@@ -1,0 +1,83 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "ParentSummary",
+  "description": "Parent-friendly insight report. All text is rule-generated. No raw probabilities exposed.",
+  "type": "object",
+  "required": [
+    "child_id", "session_id", "generated_at", "strengths", "weak_areas",
+    "best_learning_style", "attention_trend", "recommended_offline_activity",
+    "parent_action", "confidence", "human_summary"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "child_id":     { "type": "string" },
+    "session_id":   { "type": "string" },
+    "generated_at": { "type": "string", "format": "date-time" },
+    "strengths": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["skill", "display_name", "mastery_prob", "trend", "note"],
+        "properties": {
+          "skill":        { "type": "string" },
+          "display_name": { "type": "string" },
+          "mastery_prob": { "type": "number" },
+          "trend":        { "type": "string" },
+          "note":         { "type": "string", "description": "Parent-friendly plain text" }
+        }
+      }
+    },
+    "weak_areas": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["skill", "display_name", "mastery_prob", "trend", "note"],
+        "properties": {
+          "skill":        { "type": "string" },
+          "display_name": { "type": "string" },
+          "mastery_prob": { "type": "number" },
+          "trend":        { "type": "string" },
+          "note":         { "type": "string" }
+        }
+      }
+    },
+    "best_learning_style": {
+      "type": "object",
+      "required": ["modality", "confidence", "note"],
+      "properties": {
+        "modality":     { "type": "string" },
+        "success_rate": { "type": "number" },
+        "confidence":   { "type": "string", "enum": ["low", "moderate", "high"] },
+        "display":      { "type": "string" },
+        "note":         { "type": "string" }
+      }
+    },
+    "attention_trend": {
+      "type": "object",
+      "required": ["quality", "engagement", "fatigue_risk", "note"],
+      "properties": {
+        "quality":      { "type": "string", "enum": ["strong", "moderate", "short"] },
+        "engagement":   { "type": "string" },
+        "fatigue_risk": { "type": "number" },
+        "note":         { "type": "string" }
+      }
+    },
+    "recommended_offline_activity": {
+      "type": "string",
+      "description": "One practical activity parents can do at home. Rule-based skill+age lookup."
+    },
+    "parent_action": {
+      "type": "string",
+      "description": "One clear instruction for the parent. No jargon."
+    },
+    "confidence": {
+      "type": "string",
+      "enum": ["low", "moderate", "high"],
+      "description": "Summary-level confidence flag — NOT a raw probability."
+    },
+    "human_summary": {
+      "type": "string",
+      "description": "2-4 sentence warm summary. Rule-generated from observable conditions."
+    }
+  }
+}

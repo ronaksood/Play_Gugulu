@@ -11,6 +11,22 @@ import {
   mascotDialogues,
 } from '../../data/mascotConfig';
 import { subjects } from '../../data/subjects';
+import { useChildProfile } from '../../store/ChildProfileContext';
+
+// Maps ML skill names → child-friendly display labels for the mascot greeting
+const SKILL_GREET_LABELS: Record<string, string> = {
+  phonics:               'letters',
+  letter_recognition:    'the alphabet',
+  counting:              'counting',
+  number_order:          'numbers',
+  shape_recognition:     'shapes',
+  color_sorting:         'colours',
+  hand_eye_coordination: 'coordination',
+  attention_retention:   'focus',
+  memory_recall:         'memory',
+  social_response:       'social skills',
+  emotional_regulation:  'feelings',
+};
 
 const HOLD_DURATION_MS = 1000;
 const SPEECH_RATE = 0.9;
@@ -30,6 +46,9 @@ export function HomeScreen() {
   const navigate = useNavigate();
   const videoRef = useRef<HTMLVideoElement>(null);
   const { cursor, isReady: handTrackingReady } = useHandTracking(videoRef);
+
+  // ML child profile — null when backend is unavailable (fallback mode)
+  const { profile } = useChildProfile();
 
   const [cameraStatus, setCameraStatus] = useState<'initializing' | 'ready' | 'error'>('initializing');
   const [hoveredTarget, setHoveredTarget] = useState<HoverTarget>(null);
@@ -273,8 +292,21 @@ export function HomeScreen() {
   useEffect(() => {
     if (!isHomeReady || didWelcomeRef.current) return;
     didWelcomeRef.current = true;
-    mascotSpeak(mascotDialogues.home.join(' '));
-  }, [isHomeReady, mascotSpeak]);
+
+    // --- Dynamic greeting (ML profile available) ---
+    // Uses the recommended first session plan to tell the child what to focus on.
+    // Falls back to the hardcoded mascotDialogues.home string when profile is null
+    // (backend unavailable) so the experience is identical to the original.
+    if (profile?.recommended_first_session_plan?.main_skill) {
+      const skillLabel =
+        SKILL_GREET_LABELS[profile.recommended_first_session_plan.main_skill] ??
+        profile.recommended_first_session_plan.main_skill;
+      mascotSpeak(`Hi! Today let's practise ${skillLabel}! Pick a subject!`);
+    } else {
+      // Hardcoded fallback — original behaviour
+      mascotSpeak(mascotDialogues.home.join(' '));
+    }
+  }, [isHomeReady, mascotSpeak, profile]);
 
   useEffect(() => {
     if (selectedSubjectId) {

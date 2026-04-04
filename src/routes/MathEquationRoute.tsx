@@ -177,7 +177,7 @@ export function MathEquationRoute() {
 
     nodesRef.current = newNodes;
     setCubes(newCubes);
-    setSlotsFilled(new Array(slotCount).fill(false));
+    setSlotsFilled(new Array<boolean>(slotCount).fill(false));
     speak('Build the equation!', 'idle');
 
   }, [currentWord, playSound, speak]);
@@ -191,7 +191,7 @@ export function MathEquationRoute() {
 
     const loop = () => {
       const nodes = nodesRef.current;
-      const nodeList = Object.values(nodes);
+      const nodeList = Object.values(nodes) as CubeNode[];
       const liveCursor = cursorRef.current;
       
       const vw = window.innerWidth / 100;

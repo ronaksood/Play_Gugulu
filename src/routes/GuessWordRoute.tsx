@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { Fragment, useCallback, useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { AnimatePresence, motion } from 'motion/react';
 import confetti from 'canvas-confetti';
@@ -56,6 +56,7 @@ export function GuessWordRoute() {
   
   // Hand Tracking Smoothing Refs
   const draggedIdRef = useRef<string | null>(null);
+  const hoveredIdRef = useRef<string | null>(null);
   const pinchLossFramesRef = useRef(0);
   const cursorRef = useRef(cursor);
   const audioContextRef = useRef<AudioContext | null>(null);
@@ -158,7 +159,7 @@ export function GuessWordRoute() {
 
     nodesRef.current = newNodes;
     setCubes(newCubes);
-    setSlotsFilled(new Array(slotCount).fill(false));
+    setSlotsFilled(new Array<boolean>(slotCount).fill(false));
     speak('Spell the word!', 'idle');
   }, [currentWord, speak]);
 
@@ -173,7 +174,7 @@ export function GuessWordRoute() {
       if (isWinningRef.current) return; 
 
       const nodes = nodesRef.current;
-      const nodeList = Object.values(nodes);
+      const nodeList = Object.values(nodes) as CubeNode[];
       const liveCursor = cursorRef.current;
       // CRITICAL FIX: Get aspect ratio to make hitboxes perfectly circular on any screen
       const aspectRatio = window.innerWidth / window.innerHeight;
@@ -355,8 +356,10 @@ export function GuessWordRoute() {
 
         {/* Slot Anchors */}
         <div className="absolute top-[40vh] left-0 w-full flex justify-center gap-[2vw]" style={{ transform: 'translateY(-50%)' }}>
-          {slotsFilled.map((isFilled, i) => (
-            <SlotBox key={`slot-${i}`} isFilled={isFilled} isWrongShake={wrongShakeSlot === i} />
+          {slotsFilled.map((isFilled: boolean, i) => (
+            <Fragment key={`slot-${i}`}>
+              <SlotBox isFilled={isFilled} isWrongShake={wrongShakeSlot === i} />
+            </Fragment>
           ))}
         </div>
       </div>

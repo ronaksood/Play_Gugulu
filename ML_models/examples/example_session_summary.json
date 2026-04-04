@@ -1,0 +1,26 @@
+{
+  "child_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+  "session_id": "sess_20260403_002",
+  "generated_at": "2026-04-03T10:22:15Z",
+  "duration_minutes": 12.0,
+  "tasks_completed": 25,
+  "overall_accuracy": 0.72,
+  "skills_practiced": [
+    "phonics", "letter_recognition", "counting",
+    "shape_recognition", "color_sorting", "number_order"
+  ],
+  "skills_improved": ["letter_recognition", "counting", "shape_recognition", "color_sorting"],
+  "skills_improved_display": [
+    "Letter Recognition", "Counting", "Shape Recognition", "Color Sorting"
+  ],
+  "skills_needing_support": ["phonics", "number_order"],
+  "skills_needing_support_display": ["Phonics & Sounds", "Number Order"],
+  "engagement_notes": {
+    "state": "neutral",
+    "fatigue_risk": 0.28,
+    "duration_min": 12.0,
+    "note": "Steady engagement with some slower moments at 12.0 minutes."
+  },
+  "recommended_next_session_time": "later_today_or_tomorrow",
+  "summary_for_parent": "Aarav completed 25 activities in 12 minutes. Good progress on: Letter Recognition, Counting. Extra practice will help with: Phonics & Sounds, Number Order. Focus and energy were great today!"
+}

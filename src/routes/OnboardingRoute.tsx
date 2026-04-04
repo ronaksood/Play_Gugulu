@@ -1,7 +1,9 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef, type Dispatch, type SetStateAction } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Mascot } from '../components/home/Mascot';
 import type { MascotState } from '../data/mascotConfig';
+import { useChildProfile } from '../store/ChildProfileContext';
+import { callOnboardingAPI } from '../services/api';
 
 const HEADING_FONT = '"Fredoka One", "Arial Rounded MT Bold", "Varela Round", "Comic Sans MS", sans-serif';
 const BODY_FONT = '"Nunito", "Quicksand", "Segoe UI Rounded", "Comic Sans MS", sans-serif';
@@ -11,18 +13,24 @@ interface OnboardingRouteProps {
 }
 
 export function OnboardingRoute({ onComplete }: OnboardingRouteProps) {
+  const { setProfile } = useChildProfile();
+
   const [step, setStep] = useState(0);
   const [email, setEmail] = useState('');
   const [age, setAge] = useState<number | null>(null);
   const [interests, setInterests] = useState<string[]>([]);
   const [goals, setGoals] = useState<string[]>([]);
-  
+
   const [mascotState, setMascotState] = useState<MascotState>('idle');
   const [mascotLine, setMascotLine] = useState("Hi! I'm your PlaySpark buddy!");
   const [mascotNonce, setMascotNonce] = useState(0);
-  
+
   const [loadingProgress, setLoadingProgress] = useState(0);
   const [loadingText, setLoadingText] = useState('Mixing magic potions...');
+
+  // Ref to track whether the ML API call has already been fired for this
+  // loading session — prevents duplicate calls if the effect re-runs.
+  const apiCalledRef = useRef(false);
 
   const speak = useCallback((text: string, state: MascotState) => {
     setMascotLine(text); setMascotState(state); setMascotNonce(n => n + 1);
@@ -45,47 +53,79 @@ export function OnboardingRoute({ onComplete }: OnboardingRouteProps) {
     if (step === 5) speak("Building your magical learning path!", 'happy');
   }, [step, speak]);
 
-  // Loading Screen Logic
+  // Loading Screen Logic + ML API call
   useEffect(() => {
-    if (step === 5) {
-      const texts = [
-        "Analyzing age band priorities...",
-        "Setting up auditory modality...",
-        "Boosting phonics & counting magic...",
-        "Ready to play!"
-      ];
-      
-      let currentProgress = 0;
-      const interval = setInterval(() => {
-        currentProgress += 2;
-        setLoadingProgress(currentProgress);
-        
-        if (currentProgress === 25) setLoadingText(texts[0]);
-        if (currentProgress === 50) setLoadingText(texts[1]);
-        if (currentProgress === 75) setLoadingText(texts[2]);
-        if (currentProgress >= 100) {
-          setLoadingText(texts[3]);
-          clearInterval(interval);
-          
-          // Generate the backend JSON data
-          const onboardingData = {
-            parent_email: email,
-            age_band: age && age <= 5 ? "preschool" : "early_primary",
-            preferred_modality: interests.includes('music') || interests.includes('stories') ? "auditory" : "visual",
-            priors_boosted: goals,
-            confidence: 0.40
-          };
-          console.log("Onboarding Complete! Personalized Data:", onboardingData);
-          
-          setTimeout(onComplete, 1500); // Transition to Home
-        }
-      }, 60);
-      
-      return () => clearInterval(interval);
-    }
-  }, [step, email, age, interests, goals, onComplete]);
+    if (step !== 5) return;
 
-  const toggleSelection = (setter: React.Dispatch<React.SetStateAction<string[]>>, item: string) => {
+    const texts = [
+      "Analyzing age band priorities...",
+      "Setting up auditory modality...",
+      "Boosting phonics & counting magic...",
+      "Ready to play!"
+    ];
+
+    // -----------------------------------------------------------------------
+    // Fire the ML API call as soon as the loading screen appears.
+    // The progress-bar animation takes ~4.5 s, giving the backend ample time.
+    // On success the profile is stored in ChildProfileContext.
+    // On failure (backend down, timeout, error) setProfile(null) is called so
+    // isProfileLoaded becomes true and the app transitions normally.
+    // -----------------------------------------------------------------------
+    if (!apiCalledRef.current) {
+      apiCalledRef.current = true;
+
+      const payload = {
+        parent_email: email,
+        child_age: age ?? 5,
+        interests,
+        goals,
+        child_name: "Learner",
+        language: "en",
+        sensitivities: [],
+        allowed_session_minutes: 15,
+      };
+
+      callOnboardingAPI(payload)
+        .then((profile) => {
+          // profile is ChildProfile | null — both are valid; null = fallback mode
+          setProfile(profile);
+          if (profile) {
+            console.log("[PlaySpark] ML profile loaded:", profile.child_id, "| age_band:", profile.age_band);
+          } else {
+            console.log("[PlaySpark] Backend unavailable — running with hardcoded defaults.");
+          }
+        })
+        .catch(() => {
+          // callOnboardingAPI already swallows errors internally;
+          // this catch is an extra safety net.
+          setProfile(null);
+        });
+    }
+
+    // -----------------------------------------------------------------------
+    // Progress-bar animation — identical to the original implementation.
+    // The UI does not block on the API call; both run in parallel.
+    // -----------------------------------------------------------------------
+    let currentProgress = 0;
+    const interval = setInterval(() => {
+      currentProgress += 2;
+      setLoadingProgress(currentProgress);
+
+      if (currentProgress === 25) setLoadingText(texts[0]);
+      if (currentProgress === 50) setLoadingText(texts[1]);
+      if (currentProgress === 75) setLoadingText(texts[2]);
+      if (currentProgress >= 100) {
+        setLoadingText(texts[3]);
+        clearInterval(interval);
+        setTimeout(onComplete, 1500); // Transition to Home
+      }
+    }, 60);
+
+    return () => clearInterval(interval);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [step]);
+
+  const toggleSelection = (setter: Dispatch<SetStateAction<string[]>>, item: string) => {
     setter(prev => prev.includes(item) ? prev.filter(i => i !== item) : [...prev, item]);
   };
 

@@ -1,0 +1,52 @@
+{
+  "macro_f1": 0.9919,
+  "brier_per_class": {
+    "fatigued": 0.0009,
+    "neutral": 0.0061,
+    "engaged": 0.0052
+  },
+  "n_train": 6400,
+  "n_val": 1600,
+  "top_features": [
+    {
+      "feature": "response_time_trend",
+      "importance": 0.355385
+    },
+    {
+      "feature": "response_time_last3_mean",
+      "importance": 0.166577
+    },
+    {
+      "feature": "time_to_first_response_trend",
+      "importance": 0.096058
+    },
+    {
+      "feature": "error_rate_last_5",
+      "importance": 0.095859
+    },
+    {
+      "feature": "hint_usage_rate_session",
+      "importance": 0.081248
+    },
+    {
+      "feature": "error_rate_last_10",
+      "importance": 0.074256
+    },
+    {
+      "feature": "response_time_zscore",
+      "importance": 0.04549
+    },
+    {
+      "feature": "retry_rate_session",
+      "importance": 0.019133
+    },
+    {
+      "feature": "response_time_cv",
+      "importance": 0.00749
+    },
+    {
+      "feature": "inactivity_event_count",
+      "importance": 0.006049
+    }
+  ]
+}

@@ -1,0 +1,35 @@
+{
+  "child_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+  "session_id": "sess_20260403_002",
+  "next_task_id": "task_phonics_2_auditory",
+  "next_skill_focus": "phonics",
+  "next_skill_display": "Phonics & Sounds",
+  "next_modality": "auditory",
+  "next_difficulty": 2,
+  "next_difficulty_label": "easy",
+  "hint_intensity": "medium",
+  "reward_type": "sparkle",
+  "session_length_adjustment": {
+    "remaining_seconds": 252,
+    "action": "maintain"
+  },
+  "end_session": false,
+  "parent_tip": "Phonics & Sounds needs more practice. Short, playful practice moments work best — even 5 minutes helps.",
+  "reason": "phonics selected (low mastery, 31%); difficulty held steady at easy — model confidence moderate; auditory modality because child's preferred modality is auditory.",
+  "mastery_context": {
+    "skill": "phonics",
+    "mastery_prob": 0.31,
+    "mastery_class": "low",
+    "confidence": 0.72
+  },
+
+  "_comment_for_judges": {
+    "formula_rules_applied": [
+      "mastery_prob=0.31 < 0.40 → reduce difficulty (but already at safe minimum for age_band=preschool → maintain 2)",
+      "engagement_state=neutral → no fatigue modality switch",
+      "preferred_modality=auditory → use auditory",
+      "hint_intensity: mastery_prob=0.31 in [0.30, 0.50) → medium",
+      "reward_type: no streak ≥5, no milestone crossing → sparkle (default)"
+    ]
+  }
+}

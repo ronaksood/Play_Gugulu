@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pip install:*)",
+      "Bash(python training/train_skill_mastery.py)",
+      "Bash(python training/train_engagement.py)",
+      "Bash(python -c ':*)",
+      "Bash(python main.py --trained)"
+    ]
+  }
+}

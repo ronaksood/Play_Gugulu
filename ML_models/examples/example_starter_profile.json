@@ -1,0 +1,92 @@
+{
+  "child_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+  "name": "Aarav",
+  "age_months": 66,
+  "age_band": "preschool",
+  "language": "en",
+  "interests": ["animals", "music", "stories"],
+  "goals": ["improve counting", "learn phonics"],
+  "sensitivities": [],
+  "sessions_completed": 0,
+  "preferred_modality": "auditory",
+  "allowed_session_minutes": 15,
+  "current_difficulty_per_skill": {
+    "phonics": 2,
+    "letter_recognition": 2,
+    "counting": 2,
+    "number_order": 2,
+    "shape_recognition": 2,
+    "color_sorting": 2,
+    "hand_eye_coordination": 2,
+    "attention_retention": 2,
+    "memory_recall": 2,
+    "social_response": 2,
+    "emotional_regulation": 2
+  },
+  "skill_mastery_probs": {
+    "phonics": 0.30,
+    "letter_recognition": 0.35,
+    "counting": 0.55,
+    "number_order": 0.30,
+    "shape_recognition": 0.55,
+    "color_sorting": 0.60,
+    "hand_eye_coordination": 0.45,
+    "attention_retention": 0.35,
+    "memory_recall": 0.30,
+    "social_response": 0.50,
+    "emotional_regulation": 0.38
+  },
+  "unlocked_skills": [
+    "counting", "color_sorting", "emotional_regulation",
+    "hand_eye_coordination", "letter_recognition",
+    "memory_recall", "number_order", "phonics",
+    "shape_recognition", "social_response"
+  ],
+  "days_since_last_session": 0,
+  "flags": {
+    "new_user": true,
+    "needs_calibration": true,
+    "cold_start": true
+  },
+  "safe_difficulty_range": {
+    "min": 1,
+    "max": 4,
+    "min_label": "very_easy",
+    "max_label": "hard"
+  },
+  "initial_skill_estimates": {
+    "phonics": {
+      "mastery_prob": 0.30,
+      "mastery_class": "low",
+      "source": "age_band_prior",
+      "confidence": 0.40
+    },
+    "counting": {
+      "mastery_prob": 0.55,
+      "mastery_class": "developing",
+      "source": "age_band_prior+goal_boost",
+      "confidence": 0.40
+    },
+    "color_sorting": {
+      "mastery_prob": 0.60,
+      "mastery_class": "developing",
+      "source": "age_band_prior",
+      "confidence": 0.40
+    }
+  },
+  "recommended_first_session_plan": {
+    "structure": ["warm_up", "main_activity", "cool_down"],
+    "warm_up_skill": "color_sorting",
+    "main_skill": "counting",
+    "cool_down_skill": "shape_recognition",
+    "starting_difficulty": 2,
+    "preferred_modality": "auditory",
+    "session_minutes": 15,
+    "tasks_per_skill": 5,
+    "hint_mode": "generous",
+    "reward_frequency": "high",
+    "note": "First session is a calibration session — the app will observe and adjust."
+  },
+  "created_at": "2026-04-03T10:00:00Z",
+  "updated_at": "2026-04-03T10:00:00Z"
+}
