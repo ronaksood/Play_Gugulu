@@ -9,6 +9,8 @@
     <img src="https://img.shields.io/badge/MediaPipe-Hand_Tracking-4285F4?logo=google&logoColor=white" />
     <img src="https://img.shields.io/badge/TypeScript-5.8-3178C6?logo=typescript&logoColor=white" />
     <img src="https://img.shields.io/badge/Python-3.10+-3776AB?logo=python&logoColor=white" />
+    ![WhatsApp Image 2026-04-04 at 7 31 15 AM](https://github.com/user-attachments/assets/af4a935b-51cb-45cf-a99e-cc57b056ae63)
+
   </p>
 </div>
 
