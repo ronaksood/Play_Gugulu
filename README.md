@@ -1,6 +1,4 @@
 <div align="center">
-  <img width="1200" height="475" alt="PlayGugulu Banner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-
   <h1>PlayGugulu</h1>
   <p><strong>Adaptive AI-Powered Learning Platform for Children Ages 3–7</strong></p>
 
@@ -9,7 +7,6 @@
     <img src="https://img.shields.io/badge/FastAPI-0.110-009688?logo=fastapi&logoColor=white" />
     <img src="https://img.shields.io/badge/XGBoost-ML-FF6600?logo=python&logoColor=white" />
     <img src="https://img.shields.io/badge/MediaPipe-Hand_Tracking-4285F4?logo=google&logoColor=white" />
-    <img src="https://img.shields.io/badge/Gemini_API-AI_Companion-8E75B2?logo=google&logoColor=white" />
     <img src="https://img.shields.io/badge/TypeScript-5.8-3178C6?logo=typescript&logoColor=white" />
     <img src="https://img.shields.io/badge/Python-3.10+-3776AB?logo=python&logoColor=white" />
   </p>
